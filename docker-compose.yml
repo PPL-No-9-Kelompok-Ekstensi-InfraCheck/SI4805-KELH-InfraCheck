@@ -1,0 +1,78 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER_ID: ${USER_ID:-501}
+        GROUP_ID: ${GROUP_ID:-20}
+    container_name: si4805_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html:cached
+    networks:
+      - si4805_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  webserver:
+    image: nginx:alpine
+    container_name: si4805_nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:80"
+    volumes:
+      - ./:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - si4805_network
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: si4805_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-si4805_kelh}
+      MYSQL_USER: ${DOCKER_DB_USER:-si4805_user}
+      MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+    ports:
+      - "${FORWARD_DB_PORT:-3307}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - si4805_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: si4805_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+    ports:
+      - "${FORWARD_PMA_PORT:-8080}:80"
+    networks:
+      - si4805_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+networks:
+  si4805_network:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local

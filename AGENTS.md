@@ -55,7 +55,11 @@ Baca bagian ini sebelum mengubah kode.
 
 ## Git
 - Branch per anggota: `<Nama>_Branch`
-- Format commit: `<PBI n>: <ringkasan>` — contoh `PBI 7: kelola jenis perangkat`
+- Format commit: `<ISSUE-KEY> PBI <n>: <ringkasan>`
+  contoh `PN9KEIT-7 PBI 7: kelola jenis perangkat`
+- **Issue key Jira wajib ada di awal commit message** — tanpa itu commit tidak
+  muncul di panel *Development* pada issue Jira. Key diambil dari URL issue,
+  misal `.../selectedIssue=PN9KEIT-7` → `PN9KEIT-7`.
 - Jangan commit: `.env`, `vendor/`, `node_modules`, `public/build`
 
 ## LARANGAN

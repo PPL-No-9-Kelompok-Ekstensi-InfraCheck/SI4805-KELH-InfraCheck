@@ -81,6 +81,22 @@ class Report extends Model
         return $this->hasOne(Assignment::class, 'id_laporan', 'id_laporan')->where('status_penugasan', 'aktif');
     }
 
+    public function latestAssignment()
+    {
+        return $this->hasOne(Assignment::class, 'id_laporan', 'id_laporan')
+            ->latestOfMany('waktu_penugasan');
+    }
+
+    /**
+     * Nomor laporan yang ditampilkan, diturunkan dari ID dan tahun laporan.
+     */
+    public function getNomorLaporanAttribute(): string
+    {
+        $year = $this->waktu_laporan?->year ?? $this->created_at?->year ?? now()->year;
+
+        return sprintf('LP-%d-%04d', $year, $this->id_laporan);
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class, 'id_laporan', 'id_laporan');

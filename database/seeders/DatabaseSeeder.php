@@ -169,5 +169,10 @@ class DatabaseSeeder extends Seeder
                 'akun_aktif' => true,
             ]
         );
+
+        // 8. Data demo laporan untuk lingkungan lokal.
+        if (app()->environment('local')) {
+            $this->call(ReportDemoSeeder::class);
+        }
     }
 }

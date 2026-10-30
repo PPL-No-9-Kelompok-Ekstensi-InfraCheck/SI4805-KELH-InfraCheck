@@ -75,4 +75,36 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'id_peran', 'id_peran');
     }
+
+    /**
+     * Periksa apakah pengguna memiliki salah satu peran yang diberikan.
+     */
+    public function hasRole(string|array $roles): bool
+    {
+        $currentRole = $this->role?->nama_peran;
+
+        if ($currentRole === null) {
+            return false;
+        }
+
+        return in_array($currentRole, (array) $roles, true);
+    }
+
+    /**
+     * Nama pendek untuk tampilan, misalnya "Agus Santoso" menjadi "Agus S.".
+     */
+    public function getShortNameAttribute(): string
+    {
+        $parts = preg_split('/\s+/', trim((string) $this->nama)) ?: [];
+
+        if ($parts === []) {
+            return '';
+        }
+
+        if (count($parts) === 1) {
+            return $parts[0];
+        }
+
+        return $parts[0].' '.mb_substr($parts[1], 0, 1).'.';
+    }
 }

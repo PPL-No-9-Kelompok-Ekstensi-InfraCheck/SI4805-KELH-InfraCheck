@@ -11,6 +11,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $table = 'users';
+
     protected $primaryKey = 'id_pengguna';
 
     /**
@@ -74,5 +75,13 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class, 'id_peran', 'id_peran');
+    }
+
+    /**
+     * Cek apakah pengguna memiliki peran tertentu.
+     */
+    public function hasRole(string $namaPeran): bool
+    {
+        return strcasecmp((string) $this->role?->nama_peran, $namaPeran) === 0;
     }
 }

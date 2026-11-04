@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\InfrastructureCategory;
 use App\Models\DeviceType;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\InfrastructureCategory;
+use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Tests\TestCase;
 
 class DeviceTypeTest extends TestCase
 {
@@ -38,13 +41,13 @@ class DeviceTypeTest extends TestCase
 
         $response = $this->actingAs($this->admin())->post(route('device-types.store'), [
             'id_kategori' => $category->id_kategori,
-            'nama_jenis'  => 'Laptop',
+            'nama_jenis' => 'Laptop',
         ]);
 
         $response->assertRedirect(route('device-types.index'));
         $this->assertDatabaseHas('device_types', [
             'id_kategori' => $category->id_kategori,
-            'nama_jenis'  => 'Laptop',
+            'nama_jenis' => 'Laptop',
         ]);
     }
 
@@ -52,7 +55,7 @@ class DeviceTypeTest extends TestCase
     {
         $response = $this->actingAs($this->admin())->post(route('device-types.store'), [
             'id_kategori' => '',
-            'nama_jenis'  => '',
+            'nama_jenis' => '',
         ]);
 
         $response->assertSessionHasErrors(['id_kategori', 'nama_jenis']);
@@ -64,7 +67,7 @@ class DeviceTypeTest extends TestCase
 
         $response = $this->actingAs($this->admin())->post(route('device-types.store'), [
             'id_kategori' => $category->id_kategori,
-            'nama_jenis'  => 'Access Point Wi-Fi',
+            'nama_jenis' => 'Access Point Wi-Fi',
         ]);
 
         $response->assertSessionHasErrors('nama_jenis');
@@ -74,7 +77,7 @@ class DeviceTypeTest extends TestCase
     {
         $response = $this->actingAs($this->admin())->post(route('device-types.store'), [
             'id_kategori' => 99999,
-            'nama_jenis'  => 'Tablet',
+            'nama_jenis' => 'Tablet',
         ]);
 
         $response->assertSessionHasErrors('id_kategori');
@@ -86,12 +89,12 @@ class DeviceTypeTest extends TestCase
 
         $response = $this->actingAs($this->admin())->put(route('device-types.update', $type), [
             'id_kategori' => $type->id_kategori,
-            'nama_jenis'  => 'Renamed Jenis',
+            'nama_jenis' => 'Renamed Jenis',
         ]);
 
         $response->assertRedirect(route('device-types.index'));
         $this->assertDatabaseHas('device_types', [
-            'id_jenis'   => $type->id_jenis,
+            'id_jenis' => $type->id_jenis,
             'nama_jenis' => 'Renamed Jenis',
         ]);
     }
@@ -101,7 +104,7 @@ class DeviceTypeTest extends TestCase
         $category = InfrastructureCategory::first();
         $type = DeviceType::create([
             'id_kategori' => $category->id_kategori,
-            'nama_jenis'  => 'To Delete',
+            'nama_jenis' => 'To Delete',
         ]);
 
         $response = $this->actingAs($this->admin())->delete(route('device-types.destroy', $type));
@@ -125,5 +128,103 @@ class DeviceTypeTest extends TestCase
     {
         $response = $this->get(route('device-types.index'));
         $response->assertRedirect(route('login'));
+    }
+
+    public static function nonAdminEmails(): array
+    {
+        return [
+            'teknisi' => ['teknisi@infracheck.ac.id'],
+            'pelapor' => ['pelapor@infracheck.ac.id'],
+            'pimpinan' => ['pimpinan@infracheck.ac.id'],
+        ];
+    }
+
+    #[DataProvider('nonAdminEmails')]
+    public function test_non_admin_tidak_boleh_membuka_halaman_kelola(string $email): void
+    {
+        $user = User::where('email', $email)->firstOrFail();
+        $type = DeviceType::firstOrFail();
+
+        $this->actingAs($user)->get(route('device-types.index'))->assertForbidden();
+        $this->actingAs($user)->get(route('device-types.create'))->assertForbidden();
+        $this->actingAs($user)->get(route('device-types.edit', $type))->assertForbidden();
+    }
+
+    #[DataProvider('nonAdminEmails')]
+    public function test_non_admin_tidak_boleh_mengubah_data(string $email): void
+    {
+        $user = User::where('email', $email)->firstOrFail();
+        $category = InfrastructureCategory::firstOrFail();
+        $type = DeviceType::firstOrFail();
+
+        $this->actingAs($user)->post(route('device-types.store'), [
+            'id_kategori' => $category->id_kategori,
+            'nama_jenis' => 'Dibuat Non Admin',
+        ])->assertForbidden();
+        $this->assertDatabaseMissing('device_types', ['nama_jenis' => 'Dibuat Non Admin']);
+
+        $this->actingAs($user)->put(route('device-types.update', $type), [
+            'id_kategori' => $type->id_kategori,
+            'nama_jenis' => 'Diubah Non Admin',
+        ])->assertForbidden();
+        $this->assertDatabaseMissing('device_types', ['nama_jenis' => 'Diubah Non Admin']);
+
+        $unused = DeviceType::create([
+            'id_kategori' => $category->id_kategori,
+            'nama_jenis' => 'Tidak Boleh Dihapus',
+        ]);
+
+        $this->actingAs($user)->delete(route('device-types.destroy', $unused))->assertForbidden();
+        $this->assertDatabaseHas('device_types', ['id_jenis' => $unused->id_jenis]);
+    }
+
+    public function test_admin_dapat_membuka_form_tambah_dan_edit(): void
+    {
+        $type = DeviceType::firstOrFail();
+
+        $this->actingAs($this->admin())
+            ->get(route('device-types.create'))
+            ->assertOk()
+            ->assertSee('Tambah Jenis Perangkat');
+
+        $this->actingAs($this->admin())
+            ->get(route('device-types.edit', $type))
+            ->assertOk()
+            ->assertSee('Edit Jenis Perangkat');
+    }
+
+    public function test_menu_jenis_perangkat_hanya_tampil_untuk_admin(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('dashboard'))
+            ->assertSee('Jenis Perangkat');
+
+        $this->actingAs(User::where('email', 'teknisi@infracheck.ac.id')->firstOrFail())
+            ->get(route('dashboard'))
+            ->assertDontSee('Jenis Perangkat');
+    }
+
+    public function test_route_show_tidak_tersedia(): void
+    {
+        $type = DeviceType::firstOrFail();
+
+        // Route show dihapus; URI yang sama hanya melayani PUT/PATCH.
+        $this->withoutExceptionHandling();
+        $this->expectException(MethodNotAllowedHttpException::class);
+
+        $this->actingAs($this->admin())
+            ->get("/device-types/{$type->id_jenis}");
+    }
+
+    public function test_database_menolak_nama_jenis_duplikat(): void
+    {
+        $type = DeviceType::firstOrFail();
+
+        $this->expectException(QueryException::class);
+
+        DeviceType::create([
+            'id_kategori' => $type->id_kategori,
+            'nama_jenis' => $type->nama_jenis,
+        ]);
     }
 }

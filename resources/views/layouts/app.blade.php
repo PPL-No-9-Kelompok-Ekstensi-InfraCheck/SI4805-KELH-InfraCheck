@@ -62,10 +62,14 @@
                     </p>
                 </div>
                 @php
-                    $masterLinks = [
-                        ['Jenis Perangkat', Route::has('device-types.index') ? route('device-types.index') : '#', 'device-types.*'],
-                        ['Perangkat',      Route::has('devices.index')     ? route('devices.index')     : '#', 'devices.*'],
-                    ];
+                    $masterLinks = [];
+
+                    // Menu jenis perangkat hanya untuk Admin sesuai PBI 7.
+                    if (auth()->user()?->role?->nama_peran === 'Admin') {
+                        $masterLinks[] = ['Jenis Perangkat', Route::has('device-types.index') ? route('device-types.index') : '#', 'device-types.*'];
+                    }
+
+                    $masterLinks[] = ['Perangkat', Route::has('devices.index') ? route('devices.index') : '#', 'devices.*'];
                 @endphp
                 @foreach ($masterLinks as [$label, $url, $pattern])
                     <a href="{{ $url }}" class="flex items-center px-3.5 py-1.5 rounded-lg {{ request()->routeIs($pattern) ? 'bg-blue-600/70 text-white font-medium' : 'text-blue-100 hover:bg-blue-700/60 hover:text-white' }} text-sm transition-colors">

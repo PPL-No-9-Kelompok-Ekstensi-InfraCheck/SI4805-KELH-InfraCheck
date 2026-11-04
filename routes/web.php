@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceTypeController;
+use App\Http\Controllers\DeviceController;
 
 // Redirect root to dashboard or login
 Route::get('/', function () {
@@ -19,4 +20,5 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('device-types', DeviceTypeController::class);
+    Route::resource('devices', DeviceController::class);
 });

@@ -20,10 +20,11 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Kelola jenis perangkat hanya untuk Admin (PBI 7).
+    // Kelola jenis perangkat dan perangkat hanya untuk Admin (PBI 7 & PBI 8).
     Route::middleware('role:Admin')->group(function () {
         Route::resource('device-types', DeviceTypeController::class)->except('show');
-    });
 
-    Route::resource('devices', DeviceController::class);
+        // Detail perangkat dikelola pada PBI 9, jadi route show belum didaftarkan.
+        Route::resource('devices', DeviceController::class)->except('show');
+    });
 });

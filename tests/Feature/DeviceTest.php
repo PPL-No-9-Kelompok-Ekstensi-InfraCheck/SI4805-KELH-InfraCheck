@@ -12,6 +12,8 @@ use App\Models\ReportStatus;
 use App\Models\UrgencyLevel;
 use App\Models\Priority;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Database\Seeders\DatabaseSeeder;
 
 class DeviceTest extends TestCase
@@ -47,6 +49,27 @@ class DeviceTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Access Point Cisco AP-01');
         $response->assertSee('AST-AP-001');
+        $response->assertSee('Jaringan & Internet');
+        $response->assertSee('Gedung Kuliah Bersama 1');
+    }
+
+    public function test_index_membatasi_data_per_halaman(): void
+    {
+        Device::query()->delete();
+
+        for ($i = 1; $i <= 20; $i++) {
+            Device::create($this->payload([
+                'kode_aset'      => sprintf('AST-PAGE-%02d', $i),
+                'nama_perangkat' => sprintf('Perangkat Halaman %02d', $i),
+            ]));
+        }
+
+        $response = $this->actingAs($this->admin())->get(route('devices.index'));
+
+        $response->assertOk();
+        $response->assertSee('Perangkat Halaman 01');
+        $response->assertDontSee('Perangkat Halaman 20');
+        $response->assertSee('?page=2');
     }
 
     public function test_create_page_can_be_rendered(): void
@@ -183,5 +206,88 @@ class DeviceTest extends TestCase
     {
         $response = $this->get(route('devices.index'));
         $response->assertRedirect(route('login'));
+    }
+
+    public static function nonAdminEmails(): array
+    {
+        return [
+            'teknisi' => ['teknisi@infracheck.ac.id'],
+            'pelapor' => ['pelapor@infracheck.ac.id'],
+            'pimpinan' => ['pimpinan@infracheck.ac.id'],
+        ];
+    }
+
+    #[DataProvider('nonAdminEmails')]
+    public function test_non_admin_tidak_boleh_membuka_halaman_kelola(string $email): void
+    {
+        $user = User::where('email', $email)->firstOrFail();
+        $device = Device::firstOrFail();
+
+        $this->actingAs($user)->get(route('devices.index'))->assertForbidden();
+        $this->actingAs($user)->get(route('devices.create'))->assertForbidden();
+        $this->actingAs($user)->get(route('devices.edit', $device))->assertForbidden();
+    }
+
+    #[DataProvider('nonAdminEmails')]
+    public function test_non_admin_tidak_boleh_mengubah_data(string $email): void
+    {
+        $user = User::where('email', $email)->firstOrFail();
+        $device = Device::firstOrFail();
+
+        $this->actingAs($user)
+            ->post(route('devices.store'), $this->payload(['kode_aset' => 'AST-NONADMIN-001']))
+            ->assertForbidden();
+        $this->assertDatabaseMissing('devices', ['kode_aset' => 'AST-NONADMIN-001']);
+
+        $this->actingAs($user)
+            ->put(route('devices.update', $device), $this->payload([
+                'kode_aset'      => $device->kode_aset,
+                'nama_perangkat' => 'Diubah Non Admin',
+            ]))
+            ->assertForbidden();
+        $this->assertDatabaseMissing('devices', ['nama_perangkat' => 'Diubah Non Admin']);
+
+        $unused = Device::create($this->payload(['kode_aset' => 'AST-NONADMIN-DEL-001']));
+
+        $this->actingAs($user)->delete(route('devices.destroy', $unused))->assertForbidden();
+        $this->assertDatabaseHas('devices', ['id_perangkat' => $unused->id_perangkat]);
+    }
+
+    public function test_admin_dapat_membuka_form_tambah_dan_edit(): void
+    {
+        $device = Device::firstOrFail();
+
+        $this->actingAs($this->admin())
+            ->get(route('devices.create'))
+            ->assertOk()
+            ->assertSee('Tambah Perangkat');
+
+        $this->actingAs($this->admin())
+            ->get(route('devices.edit', $device))
+            ->assertOk()
+            ->assertSee('Edit Perangkat');
+    }
+
+    public function test_menu_perangkat_hanya_tampil_untuk_admin(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('dashboard'))
+            ->assertSee(route('devices.index'));
+
+        $this->actingAs(User::where('email', 'teknisi@infracheck.ac.id')->firstOrFail())
+            ->get(route('dashboard'))
+            ->assertDontSee(route('devices.index'));
+    }
+
+    public function test_route_show_tidak_tersedia(): void
+    {
+        $device = Device::firstOrFail();
+
+        // Route show dihapus; URI yang sama hanya melayani PUT/PATCH dan DELETE.
+        $this->withoutExceptionHandling();
+        $this->expectException(MethodNotAllowedHttpException::class);
+
+        $this->actingAs($this->admin())
+            ->get("/devices/{$device->id_perangkat}");
     }
 }

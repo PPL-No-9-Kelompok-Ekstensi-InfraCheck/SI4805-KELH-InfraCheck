@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Kondisi;
 use App\Models\Device;
 use App\Models\DeviceType;
 use App\Models\Room;
@@ -10,16 +11,11 @@ use Illuminate\Validation\Rule;
 
 class DeviceController extends Controller
 {
-    /**
-     * Nilai kondisi perangkat yang diizinkan (lihat PBI 8).
-     */
-    private const KONDISI = ['Baik', 'Rusak Ringan', 'Rusak Berat'];
-
     public function index()
     {
         $devices = Device::with(['deviceType.category', 'room.building'])
             ->orderBy('nama_perangkat')
-            ->get();
+            ->paginate(15);
 
         return view('devices.index', compact('devices'));
     }
@@ -72,7 +68,7 @@ class DeviceController extends Controller
         return [
             'types'   => DeviceType::with('category')->orderBy('nama_jenis')->get(),
             'rooms'   => Room::with('building')->orderBy('nama_ruangan')->get(),
-            'kondisi' => self::KONDISI,
+            'kondisi' => Kondisi::cases(),
         ];
     }
 
@@ -86,7 +82,7 @@ class DeviceController extends Controller
                 Rule::unique('devices', 'kode_aset')->ignore($device?->id_perangkat, 'id_perangkat'),
             ],
             'nama_perangkat' => ['required', 'string', 'max:150'],
-            'kondisi'        => ['required', Rule::in(self::KONDISI)],
+            'kondisi'        => ['required', Rule::enum(Kondisi::class)],
         ];
     }
 
@@ -101,7 +97,7 @@ class DeviceController extends Controller
             'kode_aset.unique'        => 'Kode inventaris sudah digunakan perangkat lain.',
             'nama_perangkat.required' => 'Nama perangkat wajib diisi.',
             'kondisi.required'        => 'Kondisi perangkat wajib dipilih.',
-            'kondisi.in'              => 'Kondisi perangkat tidak valid.',
+            'kondisi.enum'            => 'Kondisi perangkat tidak valid.',
         ];
     }
 }

@@ -32,28 +32,20 @@
                         <td class="px-6 py-3.5 font-mono text-xs text-slate-600">{{ $device->kode_aset }}</td>
                         <td class="px-6 py-3.5 font-medium text-slate-800">{{ $device->nama_perangkat }}</td>
                         <td class="px-6 py-3.5 text-slate-600">
-                            {{ $device->deviceType->nama_jenis ?? '-' }}
-                            @if ($device->deviceType?->category)
-                                <span class="block text-xs text-slate-400">{{ $device->deviceType->category->nama_kategori }}</span>
+                            {{ $device->jenis_label }}
+                            @if ($device->kategori_label)
+                                <span class="block text-xs text-slate-400">{{ $device->kategori_label }}</span>
                             @endif
                         </td>
                         <td class="px-6 py-3.5 text-slate-600">
-                            {{ $device->room->nama_ruangan ?? '-' }}
-                            @if ($device->room?->building)
-                                <span class="block text-xs text-slate-400">{{ $device->room->building->nama_gedung }}</span>
+                            {{ $device->lokasi_label }}
+                            @if ($device->gedung_label)
+                                <span class="block text-xs text-slate-400">{{ $device->gedung_label }}</span>
                             @endif
                         </td>
                         <td class="px-6 py-3.5">
-                            @php
-                                $badge = match ($device->kondisi) {
-                                    'Baik'         => 'bg-green-100 text-green-700',
-                                    'Rusak Ringan' => 'bg-amber-100 text-amber-700',
-                                    'Rusak Berat'  => 'bg-red-100 text-red-700',
-                                    default        => 'bg-slate-100 text-slate-600',
-                                };
-                            @endphp
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badge }}">
-                                {{ $device->kondisi }}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $device->kondisi?->badgeClass() ?? 'bg-slate-100 text-slate-600' }}">
+                                {{ $device->kondisi?->label() ?? '-' }}
                             </span>
                         </td>
                         <td class="px-6 py-3.5 text-right whitespace-nowrap">
@@ -74,5 +66,11 @@
                 @endforelse
             </tbody>
         </table>
+
+        @if ($devices->hasPages())
+            <div class="px-6 py-4 border-t border-slate-100">
+                {{ $devices->links() }}
+            </div>
+        @endif
     </div>
 @endsection

@@ -12,9 +12,11 @@ use App\Models\DeviceType;
 use App\Models\Device;
 use App\Models\ReportStatus;
 use App\Models\UrgencyLevel;
+use App\Models\Priority;
 use App\Models\Report;
 use App\Models\ReportPhoto;
 use App\Models\StatusHistory;
+use App\Models\Assignment;
 use Illuminate\Support\Carbon;
 
 class ReportSeeder extends Seeder
@@ -24,7 +26,64 @@ class ReportSeeder extends Seeder
         $statusMenunggu = ReportStatus::firstOrCreate(['nama_status' => 'Menunggu Verifikasi']);
         $urgensiSedang = UrgencyLevel::firstOrCreate(['nama_urgensi' => 'Sedang']);
         $urgensiTinggi = UrgencyLevel::firstOrCreate(['nama_urgensi' => 'Tinggi']);
+        $priorityTinggi = Priority::firstOrCreate(['nama_prioritas' => 'Tinggi']);
+        $statusDiverifikasi = ReportStatus::firstOrCreate(['nama_status' => 'Diverifikasi']);
         $rolePelapor = Role::firstOrCreate(['nama_peran' => 'Pelapor']);
+        $roleTeknisi = Role::firstOrCreate(['nama_peran' => 'Teknisi']);
+        $admin = User::where('email', 'admin@infracheck.ac.id')->first();
+
+        // 4 Teknisi sesuai Mockup Gambar 4.5.17
+        $tekAgus = User::firstOrCreate(
+            ['email' => 'agus.setiawan@infracheck.ac.id'],
+            [
+                'id_peran' => $roleTeknisi->id_peran,
+                'nama' => 'Agus Setiawan',
+                'kata_sandi_hash' => bcrypt('password'),
+                'nim_nip' => '19900808',
+                'unit' => 'Jaringan, Komputer',
+                'kontak' => '081298765001',
+                'akun_aktif' => true,
+            ]
+        );
+
+        $tekDewi = User::firstOrCreate(
+            ['email' => 'dewi.purnama@infracheck.ac.id'],
+            [
+                'id_peran' => $roleTeknisi->id_peran,
+                'nama' => 'Dewi Purnama',
+                'kata_sandi_hash' => bcrypt('password'),
+                'nim_nip' => '19920115',
+                'unit' => 'Presentasi, Audio, Cetak',
+                'kontak' => '081298765002',
+                'akun_aktif' => true,
+            ]
+        );
+
+        $tekRizky = User::firstOrCreate(
+            ['email' => 'rizky.maulana@infracheck.ac.id'],
+            [
+                'id_peran' => $roleTeknisi->id_peran,
+                'nama' => 'Rizky Maulana',
+                'kata_sandi_hash' => bcrypt('password'),
+                'nim_nip' => '19930412',
+                'unit' => 'Jaringan',
+                'kontak' => '081298765003',
+                'akun_aktif' => true,
+            ]
+        );
+
+        $tekHendra = User::firstOrCreate(
+            ['email' => 'hendra.wijaya@infracheck.ac.id'],
+            [
+                'id_peran' => $roleTeknisi->id_peran,
+                'nama' => 'Hendra Wijaya',
+                'kata_sandi_hash' => bcrypt('password'),
+                'nim_nip' => '19910520',
+                'unit' => 'Komputer, Cetak',
+                'kontak' => '081298765004',
+                'akun_aktif' => true,
+            ]
+        );
 
         // User Dosen (Fajar Nugroho) sesuai mockup
         $userFajar = User::firstOrCreate(
@@ -225,6 +284,29 @@ class ReportSeeder extends Seeder
             'id_pengubah' => $userRina->id_pengguna,
             'waktu_perubahan' => Carbon::create(2026, 10, 7, 8, 15),
             'catatan_perubahan' => 'Laporan kerusakan diajukan oleh pelapor.',
+        ]);
+
+        // 5. Laporan Terverifikasi siap ditugaskan (Sesuai Mockup Gambar 4.5.17)
+        $reportVerified = Report::create([
+            'id_pelapor' => $userFajar->id_pengguna,
+            'id_perangkat' => $deviceAP->id_perangkat,
+            'id_ruangan' => $ruangB201->id_ruangan,
+            'id_status' => $statusDiverifikasi->id_status,
+            'id_urgensi' => $urgensiTinggi->id_urgensi,
+            'id_prioritas' => $priorityTinggi->id_prioritas,
+            'id_admin_verifikator' => $admin ? $admin->id_pengguna : null,
+            'waktu_verifikasi' => Carbon::create(2026, 10, 8, 11, 0),
+            'deskripsi_kerusakan' => 'Wi-Fi di lantai 2 Gedung B tidak bisa terhubung sejak pagi, lampu access point mati.',
+            'waktu_laporan' => Carbon::create(2026, 10, 8, 10, 21),
+            'catatan_verifikasi' => 'Laporan telah diverifikasi dan prioritas ditetapkan Tinggi.',
+        ]);
+
+        StatusHistory::create([
+            'id_laporan' => $reportVerified->id_laporan,
+            'id_status' => $statusDiverifikasi->id_status,
+            'id_pengubah' => $admin ? $admin->id_pengguna : $userFajar->id_pengguna,
+            'waktu_perubahan' => Carbon::create(2026, 10, 8, 11, 0),
+            'catatan_perubahan' => 'Laporan diverifikasi oleh admin dengan prioritas Tinggi.',
         ]);
     }
 }

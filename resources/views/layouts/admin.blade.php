@@ -88,7 +88,7 @@
                 <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
                     Prioritas Penanganan
                 </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                <a href="{{ route('admin.assignment.create') }}" class="flex items-center px-3.5 py-1.5 rounded-lg {{ request()->routeIs('admin.assignment.*') ? 'bg-blue-600/70 text-white font-semibold shadow-sm' : 'text-blue-100 hover:bg-blue-700/60 hover:text-white' }} text-sm transition-colors">
                     Penugasan Teknisi
                 </a>
                 <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">

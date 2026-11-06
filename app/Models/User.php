@@ -75,4 +75,28 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class, 'id_peran', 'id_peran');
     }
+
+    /**
+     * Relasi ke penugasan sebagai teknisi.
+     */
+    public function technicianAssignments()
+    {
+        return $this->hasMany(Assignment::class, 'id_teknisi', 'id_pengguna');
+    }
+
+    /**
+     * Relasi ke penugasan yang sedang aktif.
+     */
+    public function activeAssignments()
+    {
+        return $this->hasMany(Assignment::class, 'id_teknisi', 'id_pengguna')->where('status_penugasan', 'aktif');
+    }
+
+    /**
+     * Accessor keahlian teknisi (dari kolom unit atau default).
+     */
+    public function getKeahlianAttribute(): string
+    {
+        return $this->unit ?: 'Infrastruktur Umum';
+    }
 }

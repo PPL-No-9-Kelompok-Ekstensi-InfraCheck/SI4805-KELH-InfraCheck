@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class StatusHistory extends Model
 {
     protected $table = 'status_histories';
+
     protected $primaryKey = 'id_riwayat';
 
     protected $fillable = [

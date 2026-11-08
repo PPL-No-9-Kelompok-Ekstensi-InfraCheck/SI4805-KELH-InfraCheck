@@ -31,6 +31,16 @@ class Report extends Model
         ];
     }
 
+    /**
+     * Nomor laporan untuk keperluan tampilan, mis. LP-2026-0012 (tidak tersimpan di DB).
+     */
+    public function getNomorLaporanAttribute(): string
+    {
+        $tahun = $this->waktu_laporan?->format('Y') ?? now()->format('Y');
+
+        return sprintf('LP-%s-%04d', $tahun, $this->id_laporan);
+    }
+
     public function reporter()
     {
         return $this->belongsTo(User::class, 'id_pelapor', 'id_pengguna');

@@ -10,10 +10,11 @@ class ExampleTest extends TestCase
     /**
      * A basic test example.
      */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_the_application_redirects_to_dashboard(): void
     {
         $response = $this->get('/');
 
-        $response->assertStatus(200);
+        // Halaman utama mengalihkan ke dashboard (kemudian ke login bila belum masuk)
+        $response->assertStatus(302);
     }
 }

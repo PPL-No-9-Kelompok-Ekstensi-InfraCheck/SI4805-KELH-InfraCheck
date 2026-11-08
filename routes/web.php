@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard or login
@@ -22,4 +23,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('buildings', BuildingController::class)
         ->except(['show'])
         ->middleware('can:manage-buildings');
+
+    Route::resource('rooms', RoomController::class)
+        ->except(['show'])
+        ->middleware('can:manage-rooms');
 });

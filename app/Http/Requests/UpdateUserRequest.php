@@ -2,24 +2,36 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\RestrictsAssignableRoles;
+use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
+    use RestrictsAssignableRoles;
+
     /**
      * Menentukan apakah pengguna yang mengirim request boleh melakukan aksi ini.
-     * Pengelolaan data pengguna hanya untuk Admin.
+     * Pengelolaan data pengguna hanya untuk pemegang hak akses Ubah Pengguna,
+     * dan pengguna non-Admin tidak boleh mengelola akun Admin.
      */
     public function authorize(): bool
     {
-        $user = $this->user();
+        $actor = $this->user();
 
-        return $user !== null
-            && $user->akun_aktif
-            && $user->role !== null
-            && strcasecmp($user->role->nama_peran, 'Admin') === 0;
+        if ($actor === null || ! $actor->hasPermission('users.update')) {
+            return false;
+        }
+
+        $target = $this->route('user');
+
+        return ! (
+            $target instanceof User
+            && ! $actor->isAdmin()
+            && $target->isAdmin()
+        );
     }
 
     /**
@@ -46,7 +58,7 @@ class UpdateUserRequest extends FormRequest
                 'max:255',
                 Rule::unique('users', 'nim_nip')->ignore($user?->id_pengguna, 'id_pengguna'),
             ],
-            'id_peran' => ['required', 'integer', Rule::exists('roles', 'id_peran')],
+            'id_peran' => $this->roleAssignmentRules(),
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'unit' => ['nullable', 'string', 'max:255'],
             'kontak' => ['nullable', 'string', 'max:255'],
@@ -70,6 +82,8 @@ class UpdateUserRequest extends FormRequest
             'nim_nip.unique' => 'NIM/NIP sudah digunakan oleh pengguna lain.',
             'id_peran.required' => 'Role wajib dipilih.',
             'id_peran.exists' => 'Role yang dipilih tidak tersedia.',
+            'id_peran.not_in' => 'Anda tidak dapat menetapkan role Admin.',
+            'id_peran.in' => 'Role yang dipilih memiliki hak akses lebih luas daripada hak akses Anda.',
             'password.min' => 'Password minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ];

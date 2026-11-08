@@ -35,100 +35,7 @@
 <body class="min-h-screen flex antialiased text-slate-800">
 
     <!-- ==================== SIDEBAR ==================== -->
-    <aside class="w-64 bg-[#1e40af] text-white shrink-0 min-h-screen flex flex-col justify-between select-none">
-        <div class="p-5">
-            <!-- Sidebar Brand Header -->
-            <div class="mb-7 pl-1">
-                <h1 class="text-2xl font-bold tracking-tight text-white">InfraCheck</h1>
-                <p class="text-xs text-blue-200/90 mt-0.5">
-                    Masuk sebagai {{ auth()->user()->role->nama_peran ?? 'Admin' }}
-                </p>
-            </div>
-
-            <!-- Navigation Links -->
-            <nav class="space-y-1">
-                <!-- Dashboard -->
-                <a href="{{ route('dashboard') }}" class="flex items-center px-3.5 py-2.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Dashboard
-                </a>
-
-                <!-- SECTION: MASTER DATA -->
-                <div class="pt-5 pb-1">
-                    <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
-                        MASTER DATA
-                    </p>
-                </div>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Gedung
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Ruangan
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Kategori Infrastruktur
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Jenis Perangkat
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Perangkat
-                </a>
-
-                <!-- SECTION: LAPORAN -->
-                <div class="pt-5 pb-1">
-                    <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
-                        LAPORAN
-                    </p>
-                </div>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Verifikasi Laporan
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Prioritas Penanganan
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Penugasan Teknisi
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Jadwal Perbaikan
-                </a>
-
-                <!-- SECTION: PEMANTAUAN -->
-                <div class="pt-5 pb-1">
-                    <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
-                        PEMANTAUAN
-                    </p>
-                </div>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Status Laporan
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Riwayat Penanganan
-                </a>
-
-                <!-- SECTION: PENGATURAN -->
-                <div class="pt-5 pb-1">
-                    <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
-                        PENGATURAN
-                    </p>
-                </div>
-                <a href="{{ route('users.index') }}" class="flex items-center px-3.5 py-1.5 rounded-lg bg-blue-600/70 text-white font-medium text-sm transition-colors shadow-sm">
-                    Pengguna
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Hak Akses
-                </a>
-
-                <!-- Logout Button Form -->
-                <form action="{{ route('logout') }}" method="POST" class="pt-1">
-                    @csrf
-                    <button type="submit" class="w-full text-left flex items-center px-3.5 py-1.5 rounded-lg text-blue-200 hover:bg-red-600/80 hover:text-white text-sm transition-colors">
-                        Logout
-                    </button>
-                </form>
-            </nav>
-        </div>
-    </aside>
+    @include('partials.sidebar', ['active' => 'users'])
 
     <!-- ==================== MAIN CONTENT AREA ==================== -->
     <main class="flex-1 flex flex-col min-h-screen bg-[#f1f5f9] overflow-x-hidden">
@@ -172,12 +79,14 @@
                             Kelola akun pengguna InfraCheck beserta role dan status aktivasinya.
                         </p>
                     </div>
-                    <a
-                        href="{{ route('users.create') }}"
-                        class="inline-flex items-center justify-center rounded-lg bg-[#2563eb] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
-                    >
-                        + Tambah Pengguna
-                    </a>
+                    @if (auth()->user()?->hasPermission('users.create'))
+                        <a
+                            href="{{ route('users.create') }}"
+                            class="inline-flex items-center justify-center rounded-lg bg-[#2563eb] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+                        >
+                            + Tambah Pengguna
+                        </a>
+                    @endif
                 </div>
 
                 <!-- Search -->
@@ -260,16 +169,18 @@
                                     </td>
                                     <td class="py-3.5">
                                         <div class="flex items-center gap-2">
-                                            <a
-                                                href="{{ route('users.edit', $user) }}"
-                                                class="rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
-                                            >
-                                                Edit
-                                            </a>
+                                            @if (auth()->user()?->hasPermission('users.update') && (auth()->user()->isAdmin() || ! $user->isAdmin()))
+                                                <a
+                                                    href="{{ route('users.edit', $user) }}"
+                                                    class="rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+                                                >
+                                                    Edit
+                                                </a>
+                                            @endif
 
                                             @if ((int) $user->id_pengguna === (int) auth()->id())
                                                 <span class="px-1 text-[11px] font-medium text-slate-400">Akun Anda</span>
-                                            @else
+                                            @elseif (auth()->user()?->hasPermission('users.delete') && (auth()->user()->isAdmin() || ! $user->isAdmin()))
                                                 <form
                                                     action="{{ route('users.destroy', $user) }}"
                                                     method="POST"

@@ -29,7 +29,7 @@ class UserController extends Controller
      */
     public function index(Request $request): View
     {
-        $this->ensureAdmin();
+        $this->ensurePermission('users.view');
 
         $search = trim((string) $request->query('q', ''));
 
@@ -53,11 +53,9 @@ class UserController extends Controller
      */
     public function create(): View
     {
-        $this->ensureAdmin();
+        $this->ensurePermission('users.create');
 
-        $roles = Role::orderBy('nama_peran')->get();
-
-        return view('users.create', compact('roles'));
+        return view('users.create', ['roles' => Auth::user()->assignableRoles()]);
     }
 
     /**
@@ -65,6 +63,8 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): RedirectResponse
     {
+        $this->ensurePermission('users.create');
+
         $data = $request->validated();
 
         User::create([
@@ -90,11 +90,13 @@ class UserController extends Controller
      */
     public function edit(User $user): View
     {
-        $this->ensureAdmin();
+        $this->ensurePermission('users.update');
+        $this->ensureTargetIsManageable($user);
 
-        $roles = Role::orderBy('nama_peran')->get();
-
-        return view('users.edit', compact('user', 'roles'));
+        return view('users.edit', [
+            'user' => $user,
+            'roles' => Auth::user()->assignableRoles(),
+        ]);
     }
 
     /**
@@ -102,6 +104,9 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
+        $this->ensurePermission('users.update');
+        $this->ensureTargetIsManageable($user);
+
         $data = $request->validated();
 
         $currentUser = $request->user();
@@ -111,6 +116,16 @@ class UserController extends Controller
         $newActive = $request->has('akun_aktif')
             ? $request->boolean('akun_aktif')
             : (bool) $user->akun_aktif;
+
+        // Pengguna non-Admin tidak boleh menaikkan hak akses dirinya sendiri
+        // dengan berpindah ke role yang memiliki permission lebih banyak.
+        if ($isSelf && ! $currentUser->isAdmin() && $this->roleExceedsCurrentPermissions($currentUser, $newRoleId)) {
+            return back()
+                ->withInput($request->except(['password', 'password_confirmation']))
+                ->withErrors([
+                    'id_peran' => 'Anda tidak dapat meningkatkan hak akses Anda sendiri.',
+                ]);
+        }
 
         // Admin tidak boleh menonaktifkan akunnya sendiri, meskipun masih ada Admin lain.
         if ($isSelf && $user->akun_aktif && ! $newActive) {
@@ -171,7 +186,8 @@ class UserController extends Controller
      */
     public function destroy(Request $request, User $user): RedirectResponse
     {
-        $this->ensureAdmin();
+        $this->ensurePermission('users.delete');
+        $this->ensureTargetIsManageable($user);
 
         $currentUser = $request->user();
 
@@ -216,20 +232,44 @@ class UserController extends Controller
     }
 
     /**
-     * Memastikan pengguna yang sedang login memiliki role Admin.
+     * Memastikan pengguna yang sedang login memiliki hak akses tertentu.
      */
-    private function ensureAdmin(): void
+    private function ensurePermission(string $code): void
     {
         $user = Auth::user();
 
         abort_unless(
-            $user !== null
-                && $user->akun_aktif
-                && $user->role !== null
-                && strcasecmp($user->role->nama_peran, self::ADMIN_ROLE) === 0,
+            $user !== null && $user->hasPermission($code),
             403,
-            'Anda tidak memiliki hak akses untuk mengelola data pengguna.'
+            'Anda tidak memiliki hak akses untuk tindakan ini.'
         );
+    }
+
+    /**
+     * Memastikan pengguna non-Admin tidak mengelola akun ber-role Admin.
+     */
+    private function ensureTargetIsManageable(User $target): void
+    {
+        $actor = Auth::user();
+
+        abort_if(
+            $actor !== null && ! $actor->isAdmin() && $target->isAdmin(),
+            403,
+            'Anda tidak memiliki hak akses untuk mengelola akun Admin.'
+        );
+    }
+
+    /**
+     * Mengecek apakah role tujuan memiliki permission di luar role pengguna.
+     */
+    private function roleExceedsCurrentPermissions(User $user, int $roleId): bool
+    {
+        $currentCodes = $user->permissionCodes();
+
+        $newRole = Role::with('permissions')->find($roleId);
+        $newCodes = $newRole?->permissions->pluck('kode')->all() ?? [];
+
+        return array_diff($newCodes, $currentCodes) !== [];
     }
 
     /**

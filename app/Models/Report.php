@@ -31,6 +31,15 @@ class Report extends Model
         ];
     }
 
+    /**
+     * Mendapatkan nomor laporan format resmi (contoh: LP-2026-0148).
+     */
+    public function getNomorLaporanAttribute(): string
+    {
+        $year = $this->waktu_laporan ? $this->waktu_laporan->format('Y') : date('Y');
+        return sprintf('LP-%s-%04d', $year, $this->id_laporan);
+    }
+
     public function reporter()
     {
         return $this->belongsTo(User::class, 'id_pelapor', 'id_pengguna');

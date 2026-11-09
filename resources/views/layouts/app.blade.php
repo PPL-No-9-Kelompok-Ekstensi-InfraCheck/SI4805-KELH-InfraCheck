@@ -86,7 +86,9 @@
                         PEMANTAUAN
                     </p>
                 </div>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                <a href="{{ route('reports.index') }}"
+                   class="flex items-center px-3.5 py-1.5 rounded-lg text-sm transition-colors
+                          {{ in_array($aktif, ['reports.index', 'reports.show'], true) ? 'bg-blue-600/70 text-white font-medium' : 'text-blue-100 hover:bg-blue-700/60 hover:text-white' }}">
                     Status Laporan
                 </a>
                 <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">

@@ -21,6 +21,7 @@
                 {{ session('status') }}
                 Nomor laporan Anda: <strong>{{ session('nomor_laporan') }}</strong>.
                 Laporan akan diverifikasi oleh Admin Unit IT.
+                <a href="{{ route('reports.index') }}" class="underline font-semibold">Pantau status laporan</a>.
             </span>
         </div>
     @endif

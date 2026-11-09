@@ -25,6 +25,127 @@ class ReportController extends Controller
     ];
 
     /**
+     * Menampilkan daftar laporan kerusakan milik Pelapor yang sedang login.
+     */
+    public function index(Request $request)
+    {
+        $pelapor = Auth::user();
+        $filterStatus = trim((string) $request->query('status', ''));
+
+        $laporan = Report::with(['device.room.building', 'status', 'urgency', 'assignments.progressUpdates'])
+            ->where('id_pelapor', $pelapor->id_pengguna)
+            ->when($filterStatus !== '', function ($query) use ($filterStatus) {
+                $query->whereHas('status', function ($subQuery) use ($filterStatus) {
+                    $subQuery->where('nama_status', $filterStatus);
+                });
+            })
+            ->orderByDesc('waktu_laporan')
+            ->orderByDesc('id_laporan')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Ringkasan laporan milik pelapor untuk kartu statistik
+        $seluruhLaporan = Report::with('status')
+            ->where('id_pelapor', $pelapor->id_pengguna)
+            ->get();
+
+        $ringkasan = [
+            'total' => $seluruhLaporan->count(),
+            'aktif' => $seluruhLaporan->filter(
+                fn ($item) => in_array($item->status?->nama_status, self::STATUS_AKTIF, true)
+            )->count(),
+            'selesai' => $seluruhLaporan->where('status.nama_status', 'Selesai')->count(),
+            'ditolak' => $seluruhLaporan->whereIn('status.nama_status', ['Ditolak', 'Dibatalkan'])->count(),
+        ];
+
+        $daftarStatus = ReportStatus::orderBy('id_status')->get();
+
+        return view('reports.index', compact('laporan', 'ringkasan', 'daftarStatus', 'filterStatus'))
+            ->with('halamanAktif', 'reports.index');
+    }
+
+    /**
+     * Menampilkan detail laporan kerusakan beserta riwayat status dan progresnya.
+     */
+    public function show(Report $laporan)
+    {
+        // Pelapor hanya boleh memantau laporan miliknya sendiri
+        abort_unless(
+            (int) $laporan->id_pelapor === (int) Auth::id(),
+            403,
+            'Anda tidak berhak melihat laporan milik pengguna lain.'
+        );
+
+        $laporan->load([
+            'device.deviceType',
+            'device.room.building',
+            'status',
+            'urgency',
+            'priority',
+            'reporter',
+            'verifier',
+            'photos',
+            'assignments.technician',
+            'assignments.schedule',
+            'assignments.progressUpdates',
+            'statusHistories' => fn ($query) => $query->with(['status', 'changer'])->orderBy('waktu_perubahan'),
+        ]);
+
+        // Penugasan terakhir dipakai sebagai sumber informasi teknisi dan progres
+        $penugasan = $laporan->assignments->sortByDesc('waktu_penugasan')->first();
+        $progres = $this->susunProgres($laporan);
+
+        return view('reports.show', compact('laporan', 'penugasan', 'progres'))
+            ->with('halamanAktif', 'reports.show');
+    }
+
+    /**
+     * Menyusun indikator tahapan, persentase, dan riwayat status laporan.
+     */
+    private function susunProgres(Report $laporan): array
+    {
+        $namaStatus = $laporan->status?->nama_status;
+        $statusPenutup = in_array($namaStatus, ['Ditolak', 'Dibatalkan'], true);
+        $indeksAktif = array_search($namaStatus, Report::TAHAPAN_STATUS, true);
+
+        $persentase = $laporan->persentase_progres;
+
+        $riwayat = $laporan->statusHistories->values();
+
+        // Riwayat status mungkin belum tercatat; tampilkan pengajuan sebagai titik awal
+        if ($riwayat->isEmpty()) {
+            $riwayat = collect([(object) [
+                'status' => $laporan->status,
+                'changer' => null,
+                'waktu_perubahan' => $laporan->waktu_laporan,
+                'catatan_perubahan' => 'Laporan kerusakan diajukan melalui sistem.',
+            ]]);
+        }
+
+        $tahapan = [];
+        foreach (Report::TAHAPAN_STATUS as $indeks => $namaTahap) {
+            $perubahan = $laporan->statusHistories->first(
+                fn ($item) => $item->status?->nama_status === $namaTahap
+            );
+
+            $tahapan[] = [
+                'nama' => $namaTahap,
+                'waktu' => $perubahan?->waktu_perubahan,
+                'catatan' => $perubahan?->catatan_perubahan,
+                'tercapai' => is_int($indeksAktif) && $indeks <= $indeksAktif,
+                'aktif' => is_int($indeksAktif) && $indeks === $indeksAktif,
+            ];
+        }
+
+        return [
+            'persentase' => max(0, min(100, $persentase)),
+            'tahapan' => $tahapan,
+            'riwayat' => $riwayat,
+            'statusPenutup' => $statusPenutup,
+        ];
+    }
+
+    /**
      * Menampilkan formulir pengajuan laporan kerusakan oleh Pelapor.
      */
     public function create()

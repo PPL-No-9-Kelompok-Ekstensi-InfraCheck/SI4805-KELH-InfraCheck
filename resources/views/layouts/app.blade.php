@@ -81,7 +81,9 @@
                 <a href="#" class="{{ $navIdle }}">Verifikasi Laporan</a>
                 <a href="#" class="{{ $navIdle }}">Prioritas Penanganan</a>
                 <a href="#" class="{{ $navIdle }}">Penugasan Teknisi</a>
-                <a href="#" class="{{ $navIdle }}">Jadwal Perbaikan</a>
+                <a href="{{ route('schedules.index') }}" class="{{ request()->routeIs('schedules.*') ? $navActive : $navIdle }}">
+                    {{ $user->hasRole('Teknisi') ? 'Jadwal Saya' : 'Jadwal Perbaikan' }}
+                </a>
 
                 <!-- SECTION: PEMANTAUAN -->
                 <div class="pt-5 pb-1">

@@ -172,11 +172,30 @@
                         <div class="flex items-center justify-between gap-3">
                             <span class="text-slate-500">Jadwal perbaikan</span>
                             <span class="font-semibold text-slate-800 text-right">
-                                {{ $assignment->schedule->waktu_mulai?->format('d/m/Y') }}
+                                {{ $assignment->schedule->waktu_mulai?->format('d/m/Y H:i') }}
                                 &ndash;
-                                {{ $assignment->schedule->target_selesai?->format('d/m/Y') }}
+                                {{ $assignment->schedule->target_selesai?->format('d/m/Y H:i') }}
                             </span>
                         </div>
+                        @if ($canManage || auth()->user()->hasRole('Admin'))
+                            <div class="pt-1 text-right">
+                                <a href="{{ route('schedules.edit', $assignment->schedule) }}" class="text-[11px] font-semibold text-blue-600 hover:text-blue-700">
+                                    Kelola Jadwal &rarr;
+                                </a>
+                            </div>
+                        @endif
+                    @else
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-slate-500">Jadwal perbaikan</span>
+                            <span class="text-slate-400 italic">Belum diatur</span>
+                        </div>
+                        @if ($canManage || auth()->user()->hasRole('Admin'))
+                            <div class="pt-1 text-right">
+                                <a href="{{ route('schedules.create', ['assignment_id' => $assignment->id_penugasan]) }}" class="text-[11px] font-semibold text-[#e11475] hover:underline">
+                                    + Atur Jadwal Sekarang
+                                </a>
+                            </div>
+                        @endif
                     @endif
                 </div>
             </div>

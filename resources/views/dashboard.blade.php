@@ -99,9 +99,11 @@
                         PEMANTAUAN
                     </p>
                 </div>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Status Laporan
-                </a>
+                @if ($user->hasRole(['Admin', 'Pimpinan']))
+                    <a href="{{ route('reports.status') }}" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                        Status Laporan
+                    </a>
+                @endif
                 <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
                     Riwayat Penanganan
                 </a>
@@ -215,11 +217,13 @@
                     </div>
 
                     <!-- Bottom Link -->
-                    <div class="mt-6 pt-2">
-                        <a href="#" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
-                            Lihat semua laporan &rarr;
-                        </a>
-                    </div>
+                    @if ($user->hasRole(['Admin', 'Pimpinan']))
+                        <div class="mt-6 pt-2">
+                            <a href="{{ route('reports.status') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
+                                Lihat semua laporan &rarr;
+                            </a>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- RIGHT COLUMN: Charts & Top Damaged (1 span) -->

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Assignment extends Model
 {
     protected $table = 'assignments';
+
     protected $primaryKey = 'id_penugasan';
 
     protected $fillable = [
@@ -47,5 +48,14 @@ class Assignment extends Model
     public function progressUpdates()
     {
         return $this->hasMany(RepairProgress::class, 'id_penugasan', 'id_penugasan')->orderBy('waktu_progres', 'desc');
+    }
+
+    /**
+     * Catatan progres terbaru untuk penugasan ini.
+     */
+    public function latestProgress()
+    {
+        return $this->hasOne(RepairProgress::class, 'id_penugasan', 'id_penugasan')
+            ->latestOfMany('waktu_progres');
     }
 }

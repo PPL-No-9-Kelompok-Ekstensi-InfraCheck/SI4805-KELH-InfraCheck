@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 
+use App\Models\Building;
+use App\Models\Device;
+use App\Models\DeviceType;
+use App\Models\InfrastructureCategory;
+use App\Models\Priority;
+use App\Models\ReportStatus;
+use App\Models\Role;
+use App\Models\Room;
+use App\Models\UrgencyLevel;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Role;
-use App\Models\User;
-use App\Models\Building;
-use App\Models\Room;
-use App\Models\InfrastructureCategory;
-use App\Models\DeviceType;
-use App\Models\Device;
-use App\Models\ReportStatus;
-use App\Models\UrgencyLevel;
-use App\Models\Priority;
 
 class DatabaseSeeder extends Seeder
 {
@@ -169,5 +169,8 @@ class DatabaseSeeder extends Seeder
                 'akun_aktif' => true,
             ]
         );
+
+        // 8. Data contoh laporan, penugasan, dan progres perbaikan (PBI 16).
+        $this->call(RepairProgressSeeder::class);
     }
 }

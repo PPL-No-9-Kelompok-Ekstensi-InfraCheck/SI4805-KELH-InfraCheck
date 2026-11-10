@@ -44,6 +44,20 @@
         </div>
     </div>
 
+    {{-- Banner Beri Tanggapan jika status Selesai dan user adalah pemilik --}}
+    @if (($report->id_pelapor === auth()->id() || auth()->user()->hasRole('Admin')) && $report->status?->nama_status === 'Selesai')
+        <div class="mb-6 rounded-xl border border-pink-200 bg-pink-50/70 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
+            <div>
+                <h4 class="text-sm font-bold text-pink-900">Perbaikan Selesai &mdash; Mohon Tanggapan Anda</h4>
+                <p class="text-xs text-pink-700 mt-0.5">Sampaikan konfirmasi kesesuaian dan penilaian layanan atas penanganan perbaikan perangkat ini.</p>
+            </div>
+            <a href="{{ route('reports.comments.create', $report) }}"
+               class="inline-flex items-center justify-center rounded-lg bg-[#e11467] hover:bg-[#c90f58] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors shrink-0">
+                Beri / Kelola Tanggapan &rarr;
+            </a>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {{-- Kolom kiri: informasi laporan --}}
         <div class="xl:col-span-2 space-y-6">
@@ -115,7 +129,15 @@
 
             {{-- Tanggapan --}}
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h4 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">Tanggapan</h4>
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-sm font-bold uppercase tracking-wider text-slate-500">Tanggapan</h4>
+                    @if ($report->status?->nama_status === 'Selesai' && ($report->id_pelapor === auth()->id() || auth()->user()->hasRole('Admin')))
+                        <a href="{{ route('reports.comments.create', $report) }}"
+                           class="text-xs font-semibold text-[#e11467] hover:underline">
+                            + Beri / Ubah Tanggapan
+                        </a>
+                    @endif
+                </div>
 
                 @if ($report->comments->isEmpty())
                     <p class="text-sm text-slate-500">Belum ada tanggapan pada laporan ini.</p>
@@ -124,10 +146,22 @@
                         @foreach ($report->comments as $comment)
                             <li class="rounded-lg border border-slate-200 bg-slate-50/70 p-4">
                                 <div class="flex flex-wrap items-center justify-between gap-2">
-                                    <p class="text-sm font-semibold text-slate-800">{{ $comment->user?->nama ?? '–' }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-sm font-semibold text-slate-800">{{ $comment->user?->nama ?? '–' }}</p>
+                                        @if ($comment->kesesuaian_label)
+                                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $comment->is_sesuai ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
+                                                {{ $comment->kesesuaian_label }}
+                                            </span>
+                                        @endif
+                                        @if ($comment->rating_stars)
+                                            <span class="text-xs text-amber-500 tracking-wider font-semibold">
+                                                {{ $comment->rating_stars }}
+                                            </span>
+                                        @endif
+                                    </div>
                                     <p class="text-xs text-slate-400">{{ ReportStatusPresenter::formatDate($comment->waktu_tanggapan) }}</p>
                                 </div>
-                                <p class="mt-1.5 text-sm leading-relaxed text-slate-700 whitespace-pre-line">{{ $comment->isi_tanggapan }}</p>
+                                <p class="mt-2 text-sm leading-relaxed text-slate-700 whitespace-pre-line">{{ $comment->komentar_bersih }}</p>
                             </li>
                         @endforeach
                     </ul>

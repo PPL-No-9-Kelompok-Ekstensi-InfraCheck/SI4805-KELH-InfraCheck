@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportCommentController;
 use App\Http\Controllers\ReportStatusController;
 
 // Redirect root to dashboard or login
@@ -24,4 +25,12 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:Admin,Pimpinan'])->group(function () {
     Route::get('/laporan/status', [ReportStatusController::class, 'index'])->name('reports.status');
     Route::get('/laporan/{report}', [ReportStatusController::class, 'show'])->name('reports.show');
+});
+
+// Pemberian tanggapan pada laporan (PBI 20) — Pelapor (dan Admin).
+Route::middleware('auth')->group(function () {
+    Route::get('/laporan/{report}/tanggapan', [ReportCommentController::class, 'create'])->name('reports.comments.create');
+    Route::post('/laporan/{report}/tanggapan', [ReportCommentController::class, 'store'])->name('reports.comments.store');
+    Route::put('/laporan/{report}/tanggapan/{comment}', [ReportCommentController::class, 'update'])->name('reports.comments.update');
+    Route::delete('/laporan/{report}/tanggapan/{comment}', [ReportCommentController::class, 'destroy'])->name('reports.comments.destroy');
 });

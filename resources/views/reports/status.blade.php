@@ -180,11 +180,17 @@
                             <td class="px-3 py-3 whitespace-nowrap text-[13px] text-slate-500">
                                 {{ \App\Support\ReportStatusPresenter::formatDate($report->status_histories_max_waktu_perubahan ?? $report->created_at) }}
                             </td>
-                            <td class="px-3 py-3 whitespace-nowrap text-right">
+                            <td class="px-3 py-3 whitespace-nowrap text-right space-x-1.5">
                                 <a href="{{ route('reports.show', $report) }}"
                                    class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100">
                                     Detail
                                 </a>
+                                @if ($report->status?->nama_status === 'Selesai')
+                                    <a href="{{ route('reports.comments.create', $report) }}"
+                                       class="inline-flex items-center rounded-lg border border-pink-200 bg-pink-50 px-2.5 py-1.5 text-xs font-semibold text-[#db2777] hover:bg-pink-100">
+                                        Tanggapan
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                     @empty

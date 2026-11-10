@@ -49,6 +49,19 @@
                     Dashboard
                 </a>
 
+                @if (auth()->user()->hasRole('Pelapor'))
+                    <a href="#" class="flex items-center px-3.5 py-2 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                        Buat Laporan
+                    </a>
+                    <a href="{{ route('dashboard') }}"
+                       class="flex items-center px-3.5 py-2 rounded-lg text-sm transition-colors {{ request()->routeIs('reports.comments.*') ? 'bg-blue-600/70 text-white font-medium shadow-sm' : 'text-blue-100 hover:bg-blue-700/60 hover:text-white' }}">
+                        Laporan Saya
+                    </a>
+                    <a href="#" class="flex items-center px-3.5 py-2 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                        Profil
+                    </a>
+                @endif
+
                 @if (auth()->user()->hasRole('Admin'))
                     <div class="pt-5 pb-1">
                         <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">MASTER DATA</p>
@@ -65,16 +78,30 @@
                     @endforeach
                 @endif
 
-                <div class="pt-5 pb-1">
-                    <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">PEMANTAUAN</p>
-                </div>
-                <a href="{{ route('reports.status') }}"
-                   class="flex items-center px-3.5 py-1.5 rounded-lg text-sm transition-colors {{ request()->routeIs('reports.*') ? 'bg-blue-600/70 text-white font-medium shadow-sm' : 'text-blue-100 hover:bg-blue-700/60 hover:text-white' }}">
-                    Status Laporan
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Riwayat Penanganan
-                </a>
+                @if (auth()->user()->hasRole(['Admin', 'Pimpinan']))
+                    <div class="pt-5 pb-1">
+                        <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">PEMANTAUAN</p>
+                    </div>
+                    <a href="{{ route('reports.status') }}"
+                       class="flex items-center px-3.5 py-1.5 rounded-lg text-sm transition-colors {{ request()->routeIs('reports.status', 'reports.show') ? 'bg-blue-600/70 text-white font-medium shadow-sm' : 'text-blue-100 hover:bg-blue-700/60 hover:text-white' }}">
+                        Status Laporan
+                    </a>
+                    <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                        Riwayat Penanganan
+                    </a>
+                @endif
+
+                @if (auth()->user()->hasRole('Teknisi'))
+                    <a href="#" class="flex items-center px-3.5 py-2 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                        Tugas Saya
+                    </a>
+                    <a href="#" class="flex items-center px-3.5 py-2 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                        Jadwal Saya
+                    </a>
+                    <a href="#" class="flex items-center px-3.5 py-2 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                        Profil
+                    </a>
+                @endif
 
                 @if (auth()->user()->hasRole('Admin'))
                     <div class="pt-5 pb-1">

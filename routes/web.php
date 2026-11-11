@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RoomController;
+use Illuminate\Support\Facades\Route;
 
 // Redirect root to dashboard or login
 Route::get('/', function () {
@@ -17,4 +19,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Protected dashboard route
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::resource('buildings', BuildingController::class)
+        ->except(['show'])
+        ->middleware('can:manage-buildings');
+
+    Route::resource('rooms', RoomController::class)
+        ->except(['show'])
+        ->middleware('can:manage-rooms');
 });

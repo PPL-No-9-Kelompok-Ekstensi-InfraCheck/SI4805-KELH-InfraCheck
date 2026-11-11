@@ -58,12 +58,16 @@
                         MASTER DATA
                     </p>
                 </div>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Gedung
-                </a>
-                <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
-                    Ruangan
-                </a>
+                @can('manage-buildings')
+                    <a href="{{ route('buildings.index') }}" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                        Gedung
+                    </a>
+                @endcan
+                @can('manage-rooms')
+                    <a href="{{ route('rooms.index') }}" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
+                        Ruangan
+                    </a>
+                @endcan
                 <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
                     Kategori Infrastruktur
                 </a>

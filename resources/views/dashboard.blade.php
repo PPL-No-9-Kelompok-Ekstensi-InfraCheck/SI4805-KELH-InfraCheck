@@ -1,8 +1,29 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+    <!-- ==================== SIDEBAR ==================== -->
+    @include('partials.sidebar', ['active' => 'dashboard'])
 
-@section('content')
+    <!-- ==================== MAIN CONTENT AREA ==================== -->
+    <main class="flex-1 flex flex-col min-h-screen bg-[#f1f5f9] overflow-x-hidden">
+        
+        <!-- Top Navigation Bar -->
+        <header class="h-16 bg-white border-b border-slate-200/90 px-8 flex items-center justify-between sticky top-0 z-10">
+            <!-- Page Title -->
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight">Dashboard</h2>
+
+            <!-- User Profile Chip -->
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 font-bold text-xs uppercase">
+                    {{ substr($user->nama, 0, 1) }}
+                </div>
+                <span class="text-sm font-medium text-slate-700">
+                    {{ $user->nama }} ({{ $user->role->nama_peran ?? 'Admin' }})
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Body -->
+        <div class="p-8 max-w-7xl w-full">
             
             <!-- 4 Top Stat Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-7">

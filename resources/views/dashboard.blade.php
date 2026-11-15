@@ -1,38 +1,4 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — InfraCheck</title>
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        sidebar: '#1d4ed8',
-                        sidebarHover: '#1e40af',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex antialiased text-slate-800">
+@extends('layouts.app')
 
     <!-- ==================== SIDEBAR ==================== -->
     @include('partials.sidebar', ['active' => 'dashboard'])
@@ -165,9 +131,5 @@
 
             </div>
 
-        </div>
 
-    </main>
-
-</body>
-</html>
+@endsection

@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database with initial master data.
+     * Seed data awal aplikasi. Urutan mengikuti dependensi foreign key.
      */
     public function run(): void
     {

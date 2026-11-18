@@ -79,82 +79,26 @@ class User extends Authenticatable
     }
 
     /**
-     * Mengecek apakah pengguna memiliki role dengan nama tertentu.
+     * Relasi ke penugasan sebagai teknisi.
      */
-    public function hasRole(string $name): bool
+    public function technicianAssignments()
     {
-        return $this->role !== null
-            && strcasecmp($this->role->nama_peran, $name) === 0;
+        return $this->hasMany(Assignment::class, 'id_teknisi', 'id_pengguna');
     }
 
     /**
-     * Mengecek apakah pengguna memegang role Admin.
+     * Relasi ke penugasan yang sedang aktif.
      */
-    public function isAdmin(): bool
+    public function activeAssignments()
     {
-        return $this->hasRole('Admin');
+        return $this->hasMany(Assignment::class, 'id_teknisi', 'id_pengguna')->where('status_penugasan', 'aktif');
     }
 
     /**
-     * Daftar kode hak akses yang dimiliki role pengguna.
-     *
-     * @return list<string>
+     * Accessor keahlian teknisi (dari kolom unit atau default).
      */
-    public function permissionCodes(): array
+    public function getKeahlianAttribute(): string
     {
-        return $this->role?->permissions->pluck('kode')->all() ?? [];
-    }
-
-    /**
-     * Role yang boleh ditetapkan oleh pengguna ini.
-     *
-     * Admin boleh menetapkan role apa pun. Pengguna non-Admin hanya boleh
-     * menetapkan role yang permission-nya merupakan subset dari role-nya
-     * sendiri, sehingga tidak terjadi eskalasi hak akses.
-     *
-     * @return Collection<int, Role>
-     */
-    public function assignableRoles(): Collection
-    {
-        $roles = Role::with('permissions')->orderBy('nama_peran')->get();
-
-        if ($this->isAdmin()) {
-            return $roles;
-        }
-
-        $ownCodes = $this->permissionCodes();
-
-        return $roles
-            ->reject(fn (Role $role) => strcasecmp($role->nama_peran, 'Admin') === 0)
-            ->filter(fn (Role $role) => array_diff($role->permissions->pluck('kode')->all(), $ownCodes) === [])
-            ->values();
-    }
-
-    /**
-     * Mengecek apakah pengguna aktif memiliki hak akses tertentu.
-     */
-    public function hasPermission(string $code): bool
-    {
-        if (! $this->akun_aktif || $this->role === null) {
-            return false;
-        }
-
-        return $this->role->permissions->contains('kode', $code);
-    }
-
-    /**
-     * Mengecek apakah pengguna aktif memiliki salah satu dari hak akses yang diberikan.
-     *
-     * @param  iterable<int, string>  $codes
-     */
-    public function hasAnyPermission(iterable $codes): bool
-    {
-        foreach ($codes as $code) {
-            if ($this->hasPermission($code)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->unit ?: 'Infrastruktur Umum';
     }
 }

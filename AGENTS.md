@@ -1,47 +1,75 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# Konvensi Proyek InfraCheck
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+Sistem monitoring & pelaporan infrastruktur TI kampus. Laravel + Docker.
+Baca bagian ini sebelum mengubah kode.
 
-## Prerequisites
+## Stack
+- PHP 8.3+ (container memakai 8.4), Laravel 13.x, MySQL 8.0
+- Frontend: Blade + Tailwind CSS + JS vanilla (tanpa framework)
+- Semua perintah artisan dijalankan di dalam container:
+  `docker compose exec app php artisan <perintah>`
+  Jangan `php artisan` di host (vendor/ tidak ada di host).
 
-Verify that PHP and Composer are available:
+## Struktur
+- Controller: `app/Http/Controllers` (AuthController, DashboardController, dst.)
+- Model: `app/Models` (18 model, satu per tabel bisnis)
+- View: `resources/views` (Blade)
+- Route: `routes/web.php`
 
-```sh
-php -v
-composer -V
-```
+## Database — WAJIB DIPERHATIKAN
+- Nama tabel dan kolom memakai **Bahasa Indonesia**: `id_gedung`, `nama_peran`,
+  `kode_aset`, `kata_sandi_hash`, `akun_aktif`.
+- **Primary key bukan `id`.** Setiap model wajib mendefinisikan:
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+  ```php
+  protected $table = 'buildings';
+  protected $primaryKey = 'id_gedung';
+  ```
 
-macOS:
+- Foreign key eksplisit di setiap relasi:
+  `$this->hasMany(User::class, 'id_peran', 'id_peran')`
+- Kolom `timestamps()` dipakai di semua tabel bisnis.
+- Password disimpan di `kata_sandi_hash`, **bukan** `password`.
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
+## Migrasi
+- Jangan pernah mengubah migration yang sudah ada di `main`. Buat migration baru.
+- Format nama: `YYYY_MM_DD_NNNNNN_create_<tabel>_table.php`
+- Nama tabel bisnis (18): roles, users, buildings, rooms,
+  infrastructure_categories, device_types, devices, report_statuses,
+  urgency_levels, priorities, reports, report_photos, assignments,
+  repair_schedules, repair_progress, repair_documents, comments,
+  status_histories
+- Tabel infrastruktur Laravel (jangan diubah): sessions, cache, jobs
 
-Windows PowerShell:
+## Seeder
+- Satu file per entitas (`UserSeeder`, `BuildingSeeder`, ...), dipanggil dari
+  `DatabaseSeeder`. Jangan menumpuk semua data di `DatabaseSeeder::run()`
+  (menyebabkan konflik merge antar-PBI).
 
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
+## Gaya kode
+- Komentar, pesan validasi, dan teks UI dalam **Bahasa Indonesia**.
+- Ikuti gaya yang sudah ada: docblock ringkas, model tanpa `guarded`
+  (pakai `$fillable`).
+- Jalankan `docker compose exec app php artisan test` sebelum commit.
+  Test memakai SQLite `:memory:` (lihat `phpunit.xml`), tidak menyentuh MySQL.
 
-Linux:
+## Git
+- Branch per anggota: `<Nama>_Branch`
+- Format commit: `<ISSUE-KEY> PBI <n>: <ringkasan>`
+  contoh `PN9KEIT-7 PBI 7: kelola jenis perangkat`
+- **Issue key Jira wajib ada di awal commit message** — tanpa itu commit tidak
+  muncul di panel *Development* pada issue Jira. Key diambil dari URL issue,
+  misal `.../selectedIssue=PN9KEIT-7` → `PN9KEIT-7`.
+- Jangan commit: `.env`, `vendor/`, `node_modules`, `public/build`
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
+## LARANGAN
+- JANGAN jalankan `migrate:fresh`, `migrate:refresh`, atau `db:wipe`
+  tanpa konfirmasi eksplisit — data seeder hilang.
+- JANGAN menambah dependency Composer tanpa persetujuan (mengubah
+  `composer.lock` dan memicu konflik merge untuk seluruh tim).
+- JANGAN mengubah `docker-compose.yml` tanpa diskusi tim.
+- JANGAN membuat migration untuk tabel milik PBI orang lain.
 
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+## Akun uji (password semua: `password`)
+admin@infracheck.ac.id (Admin) · teknisi@infracheck.ac.id (Teknisi)
+pelapor@infracheck.ac.id (Pelapor) · pimpinan@infracheck.ac.id (Pimpinan)

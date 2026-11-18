@@ -148,4 +148,14 @@ class Report extends Model
     {
         return $this->hasMany(StatusHistory::class, 'id_laporan', 'id_laporan');
     }
+
+    /**
+     * Nomor laporan yang ditampilkan ke pengguna, mis. LP-2026-0001.
+     */
+    public function getNomorLaporanAttribute(): string
+    {
+        $tahun = $this->waktu_laporan?->format('Y') ?? now()->format('Y');
+
+        return 'LP-'.$tahun.'-'.str_pad((string) $this->id_laporan, 4, '0', STR_PAD_LEFT);
+    }
 }

@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <<<<<<< HEAD
+    <title>@yield('title', 'InfraCheck') — InfraCheck</title>
+=======
+<<<<<<< HEAD
     <title>@yield('judul', 'InfraCheck') — InfraCheck</title>
 =======
     <title>@yield('title', 'InfraCheck') — InfraCheck</title>
 
+>>>>>>> origin/main
 >>>>>>> origin/main
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +19,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
 >>>>>>> origin/main
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -41,17 +48,36 @@
         }
     </style>
 <<<<<<< HEAD
+</head>
+<body class="min-h-screen flex antialiased text-slate-800">
+
+    @php
+        $user = auth()->user();
+        $navIdle = 'flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors';
+        $navActive = 'flex items-center px-3.5 py-2.5 rounded-lg bg-blue-600/70 text-white font-medium text-sm transition-colors shadow-sm';
+    @endphp
+
+=======
+<<<<<<< HEAD
 =======
     @stack('styles')
 >>>>>>> origin/main
 </head>
 <body class="min-h-screen flex antialiased text-slate-800">
 
+>>>>>>> origin/main
     <!-- ==================== SIDEBAR ==================== -->
     <aside class="w-64 bg-[#1e40af] text-white shrink-0 min-h-screen flex flex-col justify-between select-none">
         <div class="p-5">
             <!-- Sidebar Brand Header -->
             <div class="mb-7 pl-1">
+<<<<<<< HEAD
+                <a href="{{ route('dashboard') }}" class="block">
+                    <h1 class="text-2xl font-bold tracking-tight text-white">InfraCheck</h1>
+                </a>
+                <p class="text-xs text-blue-200/90 mt-0.5">
+                    Masuk sebagai {{ $user->role->nama_peran ?? 'Admin' }}
+=======
                 <h1 class="text-2xl font-bold tracking-tight text-white">InfraCheck</h1>
                 <p class="text-xs text-blue-200/90 mt-0.5">
 <<<<<<< HEAD
@@ -59,11 +85,16 @@
 =======
                     Masuk sebagai {{ auth()->user()->role->nama_peran ?? 'Admin' }}
 >>>>>>> origin/main
+>>>>>>> origin/main
                 </p>
             </div>
 
             <!-- Navigation Links -->
             <nav class="space-y-1">
+<<<<<<< HEAD
+                <!-- Dashboard -->
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? $navActive : $navIdle }}">
+=======
 <<<<<<< HEAD
                 @php $aktif = $halamanAktif ?? null; @endphp
 
@@ -77,6 +108,7 @@
 =======
                 <!-- Dashboard -->
                 <a href="{{ route('dashboard') }}" class="flex items-center px-3.5 py-2.5 rounded-lg {{ request()->routeIs('dashboard') ? 'bg-blue-600/70 text-white font-medium' : 'text-blue-100 hover:bg-blue-700/60 hover:text-white' }} text-sm transition-colors shadow-sm">
+>>>>>>> origin/main
                     Dashboard
                 </a>
 
@@ -86,6 +118,14 @@
                         MASTER DATA
                     </p>
                 </div>
+<<<<<<< HEAD
+                <a href="#" class="{{ $navIdle }}">Gedung</a>
+                <a href="#" class="{{ $navIdle }}">Ruangan</a>
+                <a href="#" class="{{ $navIdle }}">Kategori Infrastruktur</a>
+                <a href="#" class="{{ $navIdle }}">Jenis Perangkat</a>
+                <a href="#" class="{{ $navIdle }}">Perangkat</a>
+
+=======
                 @php
                     $masterLinks = [];
 
@@ -107,12 +147,21 @@
                 @endforeach
 
 >>>>>>> origin/main
+>>>>>>> origin/main
                 <!-- SECTION: LAPORAN -->
                 <div class="pt-5 pb-1">
                     <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
                         LAPORAN
                     </p>
                 </div>
+<<<<<<< HEAD
+                <a href="#" class="{{ $navIdle }}">Verifikasi Laporan</a>
+                <a href="#" class="{{ $navIdle }}">Prioritas Penanganan</a>
+                <a href="#" class="{{ $navIdle }}">Penugasan Teknisi</a>
+                <a href="{{ route('schedules.index') }}" class="{{ request()->routeIs('schedules.*') ? $navActive : $navIdle }}">
+                    {{ $user->hasRole('Teknisi') ? 'Jadwal Saya' : 'Jadwal Perbaikan' }}
+                </a>
+=======
 <<<<<<< HEAD
                 <a href="{{ route('reports.create') }}"
                    class="flex items-center px-3.5 py-1.5 rounded-lg text-sm transition-colors
@@ -138,6 +187,7 @@
                     </a>
                 @endforeach
 >>>>>>> origin/main
+>>>>>>> origin/main
 
                 <!-- SECTION: PEMANTAUAN -->
                 <div class="pt-5 pb-1">
@@ -145,6 +195,13 @@
                         PEMANTAUAN
                     </p>
                 </div>
+<<<<<<< HEAD
+                <a href="{{ route('progress.index') }}" class="{{ request()->routeIs('progress.*') ? $navActive : $navIdle }}">
+                    Progres Perbaikan
+                </a>
+                <a href="#" class="{{ $navIdle }}">Status Laporan</a>
+                <a href="#" class="{{ $navIdle }}">Riwayat Penanganan</a>
+=======
 <<<<<<< HEAD
                 <a href="{{ route('reports.index') }}"
                    class="flex items-center px-3.5 py-1.5 rounded-lg text-sm transition-colors
@@ -163,6 +220,7 @@
                         {{ $label }}
                     </a>
                 @endforeach
+>>>>>>> origin/main
 
                 <!-- SECTION: PENGATURAN -->
                 <div class="pt-5 pb-1">
@@ -170,6 +228,13 @@
                         PENGATURAN
                     </p>
                 </div>
+<<<<<<< HEAD
+                <a href="#" class="{{ $navIdle }}">Pengguna</a>
+                <a href="#" class="{{ $navIdle }}">Hak Akses</a>
+
+                <!-- Logout Button Form -->
+                <form action="{{ route('logout') }}" method="POST" class="pt-1">
+=======
                 @foreach (['Pengguna', 'Hak Akses'] as $label)
                     <a href="#" class="flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors">
                         {{ $label }}
@@ -178,6 +243,7 @@
 
                 <!-- Logout -->
                 <form action="{{ route('logout') }}" method="POST" class="pt-1">
+>>>>>>> origin/main
 >>>>>>> origin/main
                     @csrf
                     <button type="submit" class="w-full text-left flex items-center px-3.5 py-1.5 rounded-lg text-blue-200 hover:bg-red-600/80 hover:text-white text-sm transition-colors">
@@ -195,14 +261,24 @@
         <header class="h-16 bg-white border-b border-slate-200/90 px-8 flex items-center justify-between sticky top-0 z-10">
             <!-- Page Title -->
 <<<<<<< HEAD
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight">@yield('page_title', 'Dashboard')</h2>
+=======
+<<<<<<< HEAD
             <h2 class="text-xl font-bold text-slate-900 tracking-tight">@yield('judul', 'Dashboard')</h2>
 =======
             <h2 class="text-xl font-bold text-slate-900 tracking-tight">@yield('title', 'Dashboard')</h2>
+>>>>>>> origin/main
 >>>>>>> origin/main
 
             <!-- User Profile Chip -->
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 font-bold text-xs uppercase">
+<<<<<<< HEAD
+                    {{ substr($user->nama, 0, 1) }}
+                </div>
+                <span class="text-sm font-medium text-slate-700">
+                    {{ $user->nama }} ({{ $user->role->nama_peran ?? 'Admin' }})
+=======
 <<<<<<< HEAD
                     {{ substr(auth()->user()?->nama ?? ' ', 0, 1) }}
                 </div>
@@ -214,10 +290,31 @@
                 <span class="text-sm font-medium text-slate-700">
                     {{ auth()->user()->nama }} ({{ auth()->user()->role->nama_peran ?? 'Admin' }})
 >>>>>>> origin/main
+>>>>>>> origin/main
                 </span>
             </div>
         </header>
 
+<<<<<<< HEAD
+        <!-- Main Body -->
+        <div class="p-8 max-w-7xl w-full">
+
+            @if (session('success'))
+                <div class="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    <span class="mt-0.5 font-bold">✓</span>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                    <span class="mt-0.5 font-bold">!</span>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
+            @yield('content')
+=======
 <<<<<<< HEAD
         <!-- Page Body -->
         <div class="p-8">
@@ -241,14 +338,18 @@
         <div class="p-8 max-w-7xl w-full">
             @yield('content')
 >>>>>>> origin/main
+>>>>>>> origin/main
         </div>
 
     </main>
 
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
     @stack('skrip')
 =======
     @stack('scripts')
+>>>>>>> origin/main
 >>>>>>> origin/main
 </body>
 </html>

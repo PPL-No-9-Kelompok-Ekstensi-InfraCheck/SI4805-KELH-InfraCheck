@@ -49,4 +49,13 @@ class Assignment extends Model
     {
         return $this->hasMany(RepairProgress::class, 'id_penugasan', 'id_penugasan')->orderBy('waktu_progres', 'desc');
     }
+
+    /**
+     * Catatan progres terbaru untuk penugasan ini.
+     */
+    public function latestProgress()
+    {
+        return $this->hasOne(RepairProgress::class, 'id_penugasan', 'id_penugasan')
+            ->latestOfMany('waktu_progres');
+    }
 }

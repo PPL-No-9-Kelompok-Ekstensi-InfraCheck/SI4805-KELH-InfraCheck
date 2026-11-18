@@ -69,6 +69,14 @@ services:
       mysql:
         condition: service_healthy
 
+  selenium:
+    image: selenium/standalone-chromium:latest
+    container_name: si4805_selenium
+    restart: unless-stopped
+    shm_size: 2g
+    networks:
+      - si4805_network
+
 networks:
   si4805_network:
     driver: bridge

@@ -265,10 +265,54 @@ docker compose exec app php artisan migrate --seed
 
 ## 🧪 Menjalankan Automated Testing
 
-Untuk memvalidasi integritas fungsional otentikasi dan alur dashboard:
+### 1. Unit & Feature Testing (SQLite `:memory:`)
+Menjalankan seluruh unit & feature test (tidak menyentuh database MySQL lokal):
+```bash
+docker compose exec app php artisan test
+```
+Atau filter test tertentu:
 ```bash
 docker compose exec app php artisan test --filter=LoginTest
 ```
+
+### 2. Browser End-to-End Testing (Laravel Dusk + Selenium Docker)
+Pengujian browser sudah terintegrasi dengan container `selenium` (`selenium/standalone-chromium:latest`) di `docker-compose.yml`, sehingga **tidak perlu install ChromeDriver di host/laptop masing-masing**.
+
+**Setup awal (sekali per clone):**
+1. Pastikan seluruh container aktif (termasuk `si4805_selenium`) dan database sudah dimigrasi serta di-seed:
+   ```bash
+   docker compose up -d
+   docker compose exec app composer install --no-interaction
+   docker compose exec app php artisan migrate --seed
+   ```
+2. Buat file `.env.dusk.local` dari `.env`, lalu atur `APP_URL` dan `DUSK_DRIVER_URL`:
+   ```bash
+   cp .env .env.dusk.local
+   ```
+   Pastikan isi `.env.dusk.local` memiliki:
+   ```env
+   APP_URL=http://webserver
+   DUSK_DRIVER_URL=http://selenium:4444
+   ```
+   *(Jangan commit `.env.dusk.local` ke Git.)*
+
+**Menjalankan Dusk Test:**
+```bash
+# Jalankan seluruh Dusk test
+docker compose exec app php artisan dusk
+
+# Jalankan per fitur / PBI menggunakan --group
+docker compose exec app php artisan dusk --group=login
+docker compose exec app php artisan dusk --group=pbi1
+docker compose exec app php artisan dusk --group=pbi3
+docker compose exec app php artisan dusk --group=pbi13
+
+# Jalankan beberapa group sekaligus
+docker compose exec app php artisan dusk --group=pbi1 --group=pbi3 --group=pbi13
+```
+
+Daftar `--group` yang tersedia di `tests/Browser/`:
+`login`, `pbi1`, `pbi3`, `pbi4`, `pbi5`, `pbi7`, `pbi8`, `pbi10`, `pbi11`, `pbi13`, `pbi15`, `pbi16`, `pbi17`, `pbi19`, `pbi20`.
 
 ---
 © 2026 **Kelompok 9 (Ekstensi InfraCheck)** — SI-48-05 Telkom University. All rights reserved.

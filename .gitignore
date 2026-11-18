@@ -20,6 +20,7 @@ __pycache__/
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+/public/uploads/*
 /storage/*.key
 /storage/pail
 /vendor

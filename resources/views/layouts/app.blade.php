@@ -100,6 +100,7 @@
     </main>
 
     @stack('scripts')
+    @stack('skrip')
     @yield('skrip')
 </body>
 </html>

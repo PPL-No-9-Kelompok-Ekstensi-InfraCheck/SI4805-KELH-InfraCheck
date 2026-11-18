@@ -101,14 +101,9 @@ cp .env.docker .env
 ```
 `APP_KEY` sudah terisi di `.env.docker`, jadi tidak perlu menjalankan `key:generate`.
 
-Jika ingin menjalankan browser testing **Laravel Dusk**, salin juga `.env` menjadi `.env.dusk.local`:
+Jika ingin menjalankan browser testing **Laravel Dusk**, salin juga file template Dusk yang telah disediakan:
 ```bash
-cp .env .env.dusk.local
-```
-Lalu ubah/tambahkan 2 baris berikut di `.env.dusk.local`:
-```env
-APP_URL=http://webserver
-DUSK_DRIVER_URL=http://selenium:4444
+cp .env.dusk.local.example .env.dusk.local
 ```
 *(Jangan commit `.env` maupun `.env.dusk.local` ke Git.)*
 
@@ -296,16 +291,11 @@ Pengujian browser sudah terintegrasi dengan container `selenium` (`selenium/stan
    docker compose exec app composer install --no-interaction
    docker compose exec app php artisan migrate --seed
    ```
-2. Buat file `.env.dusk.local` dari `.env`, lalu atur `APP_URL` dan `DUSK_DRIVER_URL`:
+2. Salin file konfigurasi Dusk dari template yang sudah disediakan:
    ```bash
-   cp .env .env.dusk.local
+   cp .env.dusk.local.example .env.dusk.local
    ```
-   Pastikan isi `.env.dusk.local` memiliki:
-   ```env
-   APP_URL=http://webserver
-   DUSK_DRIVER_URL=http://selenium:4444
-   ```
-   *(Jangan commit `.env.dusk.local` ke Git.)*
+   *(File `.env.dusk.local` sudah otomatis di-ignore di `.gitignore`.)*
 
 **Menjalankan Dusk Test:**
 ```bash

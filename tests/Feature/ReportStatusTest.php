@@ -174,9 +174,17 @@ class ReportStatusTest extends TestCase
 
     public function test_pelapor_cannot_view_report_detail(): void
     {
-        $report = Report::query()->firstOrFail();
+        $pelapor = $this->userByRole('Pelapor');
+        $otherPelapor = User::create([
+            'id_peran' => $pelapor->id_peran,
+            'nama' => 'Pelapor Lain',
+            'email' => 'pelapor-lain@infracheck.ac.id',
+            'kata_sandi_hash' => bcrypt('password'),
+            'akun_aktif' => true,
+        ]);
+        $report = Report::query()->where('id_pelapor', $pelapor->id_pengguna)->firstOrFail();
 
-        $this->actingAs($this->userByRole('Pelapor'))
+        $this->actingAs($otherPelapor)
             ->get('/laporan/'.$report->id_laporan)
             ->assertForbidden();
     }

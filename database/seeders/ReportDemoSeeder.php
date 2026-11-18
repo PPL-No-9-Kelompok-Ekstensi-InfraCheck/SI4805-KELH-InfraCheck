@@ -479,7 +479,7 @@ class ReportDemoSeeder extends Seeder
                     'id_jenis' => $types[$definition['type']]->id_jenis,
                     'id_ruangan' => $rooms[$definition['room']]->id_ruangan,
                     'nama_perangkat' => $definition['nama'],
-                    'kondisi' => 'Rusak',
+                    'kondisi' => 'Rusak Berat',
                 ]
             );
         }

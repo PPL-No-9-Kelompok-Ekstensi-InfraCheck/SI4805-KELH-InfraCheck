@@ -1,14 +1,12 @@
-<<<<<<< HEAD
-@extends('layouts.admin')
+@extends(isset($laporan) ? 'layouts.app' : 'layouts.admin')
+@use('App\Support\ReportStatusPresenter')
 
-@section('title', 'Detail Laporan ' . $report->nomor_laporan)
+@section('judul', 'Detail Laporan')
+@section('title', isset($report) ? 'Detail Laporan ' . $report->nomor_laporan : 'Detail Laporan')
 @section('heading', 'Detail Laporan')
 
+@if (isset($report))
 @section('content')
-    @php
-        use App\Support\ReportStatusPresenter;
-    @endphp
-
     <div class="mb-5">
         <a href="{{ route('reports.status') }}"
            class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-blue-700">
@@ -240,11 +238,8 @@
             </div>
         </div>
     </div>
-=======
-@extends('layouts.app')
-
-@section('judul', 'Detail Laporan')
-
+@endsection
+@else
 @php
     // Warna badge untuk setiap status laporan
     $warnaStatus = [
@@ -530,5 +525,5 @@
         </div>
     </div>
 </div>
->>>>>>> origin/main
 @endsection
+@endif

@@ -25,6 +25,8 @@ class RoomTest extends TestCase
         parent::setUp();
 
         config(['app.key' => 'base64:'.base64_encode(str_repeat('t', 32))]);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(\Database\Seeders\PermissionSeeder::class);
     }
 
     public function test_admin_can_view_rooms_and_both_dashboard_links(): void
@@ -359,8 +361,15 @@ class RoomTest extends TestCase
     #[DataProvider('restrictedDashboardUsers')]
     public function test_dashboard_hides_room_link_from_unauthorized_users(string $role, bool $active): void
     {
-        $this->actingAs($this->makeUser($role, $active))->get(route('dashboard'))
-            ->assertOk()->assertDontSee(route('rooms.index'));
+        $response = $this->actingAs($this->makeUser($role, $active))->get(route('dashboard'));
+
+        if (! $active) {
+            $response->assertForbidden();
+
+            return;
+        }
+
+        $response->assertOk()->assertDontSee(route('rooms.index'));
     }
 
     public static function restrictedDashboardUsers(): array

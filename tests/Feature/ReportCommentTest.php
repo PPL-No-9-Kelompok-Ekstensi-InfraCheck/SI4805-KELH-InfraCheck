@@ -28,19 +28,19 @@ class ReportCommentTest extends TestCase
     {
         $selesaiStatus = ReportStatus::where('nama_status', 'Selesai')->firstOrFail();
 
-        return Report::firstOrCreate(
-            [
+        return Report::where('id_pelapor', $reporter->id_pengguna)
+            ->where('id_status', $selesaiStatus->id_status)
+            ->whereDoesntHave('comments')
+            ->first()
+            ?? Report::create([
                 'id_pelapor' => $reporter->id_pengguna,
                 'id_status' => $selesaiStatus->id_status,
-            ],
-            [
                 'id_perangkat' => 1,
                 'id_ruangan' => 1,
                 'id_urgensi' => 1,
                 'deskripsi_kerusakan' => 'Printer tidak mau menarik kertas saat cetak.',
                 'waktu_laporan' => now()->subDays(3),
-            ]
-        );
+            ]);
     }
 
     private function getPendingReport(User $reporter): Report

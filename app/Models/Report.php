@@ -145,16 +145,6 @@ class Report extends Model
             ->latestOfMany('waktu_penugasan');
     }
 
-    /**
-     * Nomor laporan yang ditampilkan, diturunkan dari ID dan tahun laporan.
-     */
-    public function getNomorLaporanAttribute(): string
-    {
-        $year = $this->waktu_laporan?->year ?? $this->created_at?->year ?? now()->year;
-
-        return sprintf('LP-%d-%04d', $year, $this->id_laporan);
-    }
-
     public function comments()
     {
         return $this->hasMany(Comment::class, 'id_laporan', 'id_laporan');
@@ -163,15 +153,5 @@ class Report extends Model
     public function statusHistories()
     {
         return $this->hasMany(StatusHistory::class, 'id_laporan', 'id_laporan');
-    }
-
-    /**
-     * Nomor laporan yang ditampilkan ke pengguna, mis. LP-2026-0001.
-     */
-    public function getNomorLaporanAttribute(): string
-    {
-        $tahun = $this->waktu_laporan?->format('Y') ?? now()->format('Y');
-
-        return 'LP-'.$tahun.'-'.str_pad((string) $this->id_laporan, 4, '0', STR_PAD_LEFT);
     }
 }

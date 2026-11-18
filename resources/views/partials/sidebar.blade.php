@@ -37,19 +37,19 @@
                     </p>
                 </div>
                 @if ($can('buildings.view'))
-                    <a href="#" class="{{ $linkClass }}">Gedung</a>
+                    <a href="{{ Route::has('buildings.index') ? route('buildings.index') : '#' }}" class="{{ $linkClass }}">Gedung</a>
                 @endif
                 @if ($can('rooms.view'))
-                    <a href="#" class="{{ $linkClass }}">Ruangan</a>
+                    <a href="{{ Route::has('rooms.index') ? route('rooms.index') : '#' }}" class="{{ $linkClass }}">Ruangan</a>
                 @endif
                 @if ($can('categories.view'))
                     <a href="#" class="{{ $linkClass }}">Kategori Infrastruktur</a>
                 @endif
                 @if ($can('device-types.view'))
-                    <a href="#" class="{{ $linkClass }}">Jenis Perangkat</a>
+                    <a href="{{ Route::has('device-types.index') ? route('device-types.index') : '#' }}" class="{{ $linkClass }}">Jenis Perangkat</a>
                 @endif
                 @if ($can('devices.view'))
-                    <a href="#" class="{{ $linkClass }}">Perangkat</a>
+                    <a href="{{ Route::has('devices.index') ? route('devices.index') : '#' }}" class="{{ $linkClass }}">Perangkat</a>
                 @endif
             @endif
 

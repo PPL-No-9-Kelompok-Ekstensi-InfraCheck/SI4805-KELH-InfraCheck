@@ -20,6 +20,8 @@ class BuildingTest extends TestCase
 
         // This key exists only in the test process; no .env is required or modified.
         config(['app.key' => 'base64:'.base64_encode(str_repeat('t', 32))]);
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(\Database\Seeders\PermissionSeeder::class);
     }
 
     public function test_admin_can_view_buildings_and_the_dashboard_link(): void

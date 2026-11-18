@@ -69,6 +69,10 @@ class ReportController extends Controller
      */
     public function show(Report $laporan)
     {
+        if (Auth::user()?->hasRole(['Admin', 'Pimpinan'])) {
+            return app(ReportStatusController::class)->show($laporan);
+        }
+
         // Pelapor hanya boleh memantau laporan miliknya sendiri
         abort_unless(
             (int) $laporan->id_pelapor === (int) Auth::id(),

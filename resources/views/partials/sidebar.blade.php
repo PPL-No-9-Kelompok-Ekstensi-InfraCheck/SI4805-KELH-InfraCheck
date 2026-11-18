@@ -37,19 +37,19 @@
                     </p>
                 </div>
                 @if ($can('buildings.view'))
-                    <a href="{{ Route::has('buildings.index') ? route('buildings.index') : '#' }}" class="{{ $linkClass }}">Gedung</a>
+                    <a href="{{ Route::has('buildings.index') ? route('buildings.index') : '#' }}" class="{{ ($activeNav === 'buildings' || request()->routeIs('buildings.*')) ? $activeClass : $linkClass }}">Gedung</a>
                 @endif
                 @if ($can('rooms.view'))
-                    <a href="{{ Route::has('rooms.index') ? route('rooms.index') : '#' }}" class="{{ $linkClass }}">Ruangan</a>
+                    <a href="{{ Route::has('rooms.index') ? route('rooms.index') : '#' }}" class="{{ ($activeNav === 'rooms' || request()->routeIs('rooms.*')) ? $activeClass : $linkClass }}">Ruangan</a>
                 @endif
                 @if ($can('categories.view'))
                     <a href="#" class="{{ $linkClass }}">Kategori Infrastruktur</a>
                 @endif
                 @if ($can('device-types.view'))
-                    <a href="{{ Route::has('device-types.index') ? route('device-types.index') : '#' }}" class="{{ $linkClass }}">Jenis Perangkat</a>
+                    <a href="{{ Route::has('device-types.index') ? route('device-types.index') : '#' }}" class="{{ request()->routeIs('device-types.*') ? $activeClass : $linkClass }}">Jenis Perangkat</a>
                 @endif
                 @if ($can('devices.view'))
-                    <a href="{{ Route::has('devices.index') ? route('devices.index') : '#' }}" class="{{ $linkClass }}">Perangkat</a>
+                    <a href="{{ Route::has('devices.index') ? route('devices.index') : '#' }}" class="{{ request()->routeIs('devices.*') ? $activeClass : $linkClass }}">Perangkat</a>
                 @endif
             @endif
 
@@ -61,19 +61,19 @@
                     </p>
                 </div>
                 @if ($can('reports.view'))
-                    <a href="#" data-menu="reports" class="{{ $linkClass }}">Laporan</a>
+                    <a href="{{ Route::has('reports.index') ? route('reports.index') : '#' }}" data-menu="reports" class="{{ request()->routeIs('reports.index', 'reports.create', 'reports.show') ? $activeClass : $linkClass }}">Laporan</a>
                 @endif
                 @if ($can('report-verification.view'))
-                    <a href="#" class="{{ $linkClass }}">Verifikasi Laporan</a>
+                    <a href="{{ Route::has('admin.verification.index') ? route('admin.verification.index') : '#' }}" class="{{ request()->routeIs('admin.verification.*') ? $activeClass : $linkClass }}">Verifikasi Laporan</a>
                 @endif
                 @if ($can('report-priorities.view'))
                     <a href="#" class="{{ $linkClass }}">Prioritas Penanganan</a>
                 @endif
                 @if ($can('assignments.view'))
-                    <a href="#" class="{{ $linkClass }}">Penugasan Teknisi</a>
+                    <a href="{{ Route::has('admin.assignment.create') ? route('admin.assignment.create') : '#' }}" class="{{ request()->routeIs('admin.assignment.*') ? $activeClass : $linkClass }}">Penugasan Teknisi</a>
                 @endif
                 @if ($can('schedules.view'))
-                    <a href="#" class="{{ $linkClass }}">Jadwal Perbaikan</a>
+                    <a href="{{ Route::has('schedules.index') ? route('schedules.index') : '#' }}" class="{{ request()->routeIs('schedules.*') ? $activeClass : $linkClass }}">Jadwal Perbaikan</a>
                 @endif
             @endif
 
@@ -85,7 +85,7 @@
                     </p>
                 </div>
                 @if ($can('report-statuses.view'))
-                    <a href="#" class="{{ $linkClass }}">Status Laporan</a>
+                    <a href="{{ Route::has('reports.status') ? route('reports.status') : '#' }}" class="{{ request()->routeIs('reports.status') ? $activeClass : $linkClass }}">Status Laporan</a>
                 @endif
                 @if ($can('report-histories.view'))
                     <a href="#" class="{{ $linkClass }}">Riwayat Penanganan</a>

@@ -2,23 +2,23 @@
 
 namespace Database\Seeders;
 
+use App\Models\Building;
+use App\Models\Device;
+use App\Models\DeviceType;
+use App\Models\InfrastructureCategory;
+use App\Models\Priority;
+use App\Models\ReportStatus;
+use App\Models\Role;
+use App\Models\Room;
+use App\Models\UrgencyLevel;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Role;
-use App\Models\User;
-use App\Models\Building;
-use App\Models\Room;
-use App\Models\InfrastructureCategory;
-use App\Models\DeviceType;
-use App\Models\Device;
-use App\Models\ReportStatus;
-use App\Models\UrgencyLevel;
-use App\Models\Priority;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database with initial master data.
+     * Seed data awal aplikasi. Urutan mengikuti dependensi foreign key.
      */
     public function run(): void
     {
@@ -169,5 +169,8 @@ class DatabaseSeeder extends Seeder
                 'akun_aktif' => true,
             ]
         );
+
+        // 8. Hak Akses per Role (Tabel permission & permission_role)
+        $this->call(PermissionSeeder::class);
     }
 }

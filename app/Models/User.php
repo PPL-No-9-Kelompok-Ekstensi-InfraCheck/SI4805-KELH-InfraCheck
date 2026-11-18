@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,6 +12,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $table = 'users';
+
     protected $primaryKey = 'id_pengguna';
 
     /**
@@ -74,5 +76,29 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class, 'id_peran', 'id_peran');
+    }
+
+    /**
+     * Relasi ke penugasan sebagai teknisi.
+     */
+    public function technicianAssignments()
+    {
+        return $this->hasMany(Assignment::class, 'id_teknisi', 'id_pengguna');
+    }
+
+    /**
+     * Relasi ke penugasan yang sedang aktif.
+     */
+    public function activeAssignments()
+    {
+        return $this->hasMany(Assignment::class, 'id_teknisi', 'id_pengguna')->where('status_penugasan', 'aktif');
+    }
+
+    /**
+     * Accessor keahlian teknisi (dari kolom unit atau default).
+     */
+    public function getKeahlianAttribute(): string
+    {
+        return $this->unit ?: 'Infrastruktur Umum';
     }
 }

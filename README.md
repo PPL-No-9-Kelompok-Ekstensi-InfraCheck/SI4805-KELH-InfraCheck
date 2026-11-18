@@ -101,6 +101,17 @@ cp .env.docker .env
 ```
 `APP_KEY` sudah terisi di `.env.docker`, jadi tidak perlu menjalankan `key:generate`.
 
+Jika ingin menjalankan browser testing **Laravel Dusk**, salin juga `.env` menjadi `.env.dusk.local`:
+```bash
+cp .env .env.dusk.local
+```
+Lalu ubah/tambahkan 2 baris berikut di `.env.dusk.local`:
+```env
+APP_URL=http://webserver
+DUSK_DRIVER_URL=http://selenium:4444
+```
+*(Jangan commit `.env` maupun `.env.dusk.local` ke Git.)*
+
 ### 4. Menjalankan Docker Container
 Jalankan seluruh service (Nginx, PHP 8.4 FPM, MySQL 8.0, dan phpMyAdmin):
 ```bash

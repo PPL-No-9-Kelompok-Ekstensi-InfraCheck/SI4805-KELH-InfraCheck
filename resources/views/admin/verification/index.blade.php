@@ -101,9 +101,20 @@
                     <!-- Preview Foto Dokumentasi -->
                     <div class="mt-4 flex flex-wrap gap-4">
                         @forelse ($selectedReport->photos as $index => $photo)
+                            @php
+                                $photoPath = ltrim((string) $photo->lokasi_berkas, '/');
+                                $photoUrl = null;
+                                if ($photoPath !== '' && file_exists(public_path($photoPath))) {
+                                    $photoUrl = asset($photoPath);
+                                } elseif ($photoPath !== '' && file_exists(public_path('storage/' . $photoPath))) {
+                                    $photoUrl = asset('storage/' . $photoPath);
+                                }
+                            @endphp
                             <div class="w-36 h-28 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center text-slate-500 text-xs font-medium overflow-hidden relative group">
-                                @if (file_exists(public_path('storage/' . $photo->lokasi_berkas)))
-                                    <img src="{{ asset('storage/' . $photo->lokasi_berkas) }}" alt="Foto Kerusakan" class="w-full h-full object-cover">
+                                @if ($photoUrl)
+                                    <a href="{{ $photoUrl }}" target="_blank" rel="noopener noreferrer" title="Klik untuk melihat ukuran penuh" class="block w-full h-full">
+                                        <img src="{{ $photoUrl }}" alt="Foto Kerusakan {{ $index + 1 }}" class="w-full h-full object-cover transition-transform duration-150 group-hover:scale-105">
+                                    </a>
                                 @else
                                     <div class="text-center p-2">
                                         <svg class="w-6 h-6 mx-auto text-slate-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,12 +125,7 @@
                                 @endif
                             </div>
                         @empty
-                            <div class="w-36 h-28 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-xs font-medium">
-                                foto 1
-                            </div>
-                            <div class="w-36 h-28 bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-xs font-medium">
-                                foto 2
-                            </div>
+                            <p class="text-xs text-slate-400 italic">Tidak ada foto dokumentasi.</p>
                         @endforelse
                     </div>
                 </div>

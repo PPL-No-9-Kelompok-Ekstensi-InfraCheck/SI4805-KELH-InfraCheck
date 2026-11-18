@@ -145,14 +145,20 @@
                     <label
                         for="foto"
                         id="areaUnggah"
-                        class="flex flex-col items-center justify-center gap-2 px-6 py-8 rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50/40 cursor-pointer transition-all"
+                        class="flex flex-col items-center justify-center gap-3 px-6 py-6 rounded-xl border-2 border-dashed border-slate-300 hover:border-blue-400 hover:bg-blue-50/40 cursor-pointer transition-all"
                     >
-                        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M18 9.75h.008v.008H18V9.75zM3.75 19.5h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5z" />
-                        </svg>
-                        <span class="text-xs text-slate-500">
-                            Klik untuk memilih foto (JPG / PNG / WEBP, maks. 2 MB per foto)
-                        </span>
+                        <div id="placeholderUnggah" class="flex flex-col items-center gap-2 text-center">
+                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M18 9.75h.008v.008H18V9.75zM3.75 19.5h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5z" />
+                            </svg>
+                            <span class="text-xs text-slate-500">
+                                Klik untuk memilih foto (JPG / PNG / WEBP, maks. 2 MB per foto)
+                            </span>
+                        </div>
+
+                        <!-- Pratinjau foto (di dalam kotak unggah) -->
+                        <div id="pratinjauFoto" class="hidden w-full grid grid-cols-3 sm:grid-cols-5 gap-3"></div>
+
                         <input
                             type="file"
                             id="foto"
@@ -162,9 +168,6 @@
                             class="sr-only"
                         >
                     </label>
-
-                    <!-- Pratinjau foto (diisi via JavaScript) -->
-                    <div id="pratinjauFoto" class="hidden mt-3 grid grid-cols-3 sm:grid-cols-5 gap-3"></div>
                     @error('foto.*')
                         <p class="mt-1.5 text-xs font-medium text-red-500">{{ $message }}</p>
                     @enderror
@@ -285,6 +288,7 @@
     // ==================== Pratinjau foto & pembatasan jumlah ====================
     const inputFoto = document.getElementById('foto');
     const pratinjauFoto = document.getElementById('pratinjauFoto');
+    const placeholderUnggah = document.getElementById('placeholderUnggah');
 
     inputFoto.addEventListener('change', function () {
         const berkas = Array.from(inputFoto.files);
@@ -295,23 +299,26 @@
             inputFoto.value = '';
             pratinjauFoto.innerHTML = '';
             pratinjauFoto.classList.add('hidden');
+            placeholderUnggah.classList.remove('hidden');
             return;
         }
 
         pratinjauFoto.innerHTML = '';
         if (berkas.length === 0) {
             pratinjauFoto.classList.add('hidden');
+            placeholderUnggah.classList.remove('hidden');
             return;
         }
 
         berkas.forEach(function (berkasFoto) {
             const img = document.createElement('img');
             img.src = URL.createObjectURL(berkasFoto);
-            img.className = 'h-20 w-full object-cover rounded-lg border border-slate-200';
+            img.className = 'h-24 w-full object-cover rounded-lg border border-slate-200';
             img.alt = 'Pratinjau foto dokumentasi';
             pratinjauFoto.appendChild(img);
         });
 
+        placeholderUnggah.classList.add('hidden');
         pratinjauFoto.classList.remove('hidden');
     });
 </script>

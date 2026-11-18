@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,6 +12,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $table = 'users';
+
     protected $primaryKey = 'id_pengguna';
 
     /**
@@ -77,34 +79,26 @@ class User extends Authenticatable
     }
 
     /**
-     * Periksa apakah pengguna memiliki salah satu peran yang diberikan.
+     * Relasi ke penugasan sebagai teknisi.
      */
-    public function hasRole(string|array $roles): bool
+    public function technicianAssignments()
     {
-        $currentRole = $this->role?->nama_peran;
-
-        if ($currentRole === null) {
-            return false;
-        }
-
-        return in_array($currentRole, (array) $roles, true);
+        return $this->hasMany(Assignment::class, 'id_teknisi', 'id_pengguna');
     }
 
     /**
-     * Nama pendek untuk tampilan, misalnya "Agus Santoso" menjadi "Agus S.".
+     * Relasi ke penugasan yang sedang aktif.
      */
-    public function getShortNameAttribute(): string
+    public function activeAssignments()
     {
-        $parts = preg_split('/\s+/', trim((string) $this->nama)) ?: [];
+        return $this->hasMany(Assignment::class, 'id_teknisi', 'id_pengguna')->where('status_penugasan', 'aktif');
+    }
 
-        if ($parts === []) {
-            return '';
-        }
-
-        if (count($parts) === 1) {
-            return $parts[0];
-        }
-
-        return $parts[0].' '.mb_substr($parts[1], 0, 1).'.';
+    /**
+     * Accessor keahlian teknisi (dari kolom unit atau default).
+     */
+    public function getKeahlianAttribute(): string
+    {
+        return $this->unit ?: 'Infrastruktur Umum';
     }
 }

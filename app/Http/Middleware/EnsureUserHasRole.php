@@ -9,14 +9,15 @@ use Symfony\Component\HttpFoundation\Response;
 class EnsureUserHasRole
 {
     /**
-     * Batasi akses berdasarkan nama peran pengguna.
+     * Pastikan pengguna yang sudah login memiliki salah satu peran yang diizinkan.
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         $user = $request->user();
+        $role = $user?->role?->nama_peran;
 
-        if (! $user || ! $user->hasRole($roles)) {
-            abort(403, 'Anda tidak memiliki hak akses ke halaman ini.');
+        if (! $user || ! $role || ! in_array($role, $roles, true)) {
+            abort(403, 'Anda tidak memiliki hak akses untuk halaman ini.');
         }
 
         return $next($request);

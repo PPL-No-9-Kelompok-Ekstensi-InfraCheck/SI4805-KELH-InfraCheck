@@ -87,8 +87,8 @@
                 @if ($can('report-statuses.view'))
                     <a href="{{ Route::has('reports.status') ? route('reports.status') : '#' }}" class="{{ request()->routeIs('reports.status') ? $activeClass : $linkClass }}">Status Laporan</a>
                 @endif
-                @if ($can('report-histories.view'))
-                    <a href="#" class="{{ $linkClass }}">Riwayat Penanganan</a>
+                @if ($can('report-histories.view') && ! $sidebarUser?->hasRole('Pelapor'))
+                    <a href="{{ Route::has('histories.index') ? route('histories.index') : '#' }}" class="{{ request()->routeIs('histories.*') ? $activeClass : $linkClass }}">Riwayat Penanganan</a>
                 @endif
             @endif
 

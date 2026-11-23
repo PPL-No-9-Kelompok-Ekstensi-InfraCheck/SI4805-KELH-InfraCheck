@@ -12,6 +12,7 @@ use App\Http\Controllers\RepairProgressController;
 use App\Http\Controllers\RepairScheduleController;
 use App\Http\Controllers\ReportCommentController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportHistoryController;
 use App\Http\Controllers\ReportStatusController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UserController;
@@ -95,6 +96,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/laporan/{report}/tanggapan', [ReportCommentController::class, 'store'])->name('reports.comments.store');
     Route::put('/laporan/{report}/tanggapan/{comment}', [ReportCommentController::class, 'update'])->name('reports.comments.update');
     Route::delete('/laporan/{report}/tanggapan/{comment}', [ReportCommentController::class, 'destroy'])->name('reports.comments.destroy');
+
+    // PBI 21 - Penyajian Riwayat Penanganan
+    Route::middleware('permission:report-histories.view')->group(function () {
+        Route::get('/riwayat-penanganan', [ReportHistoryController::class, 'index'])->name('histories.index');
+        Route::get('/riwayat-penanganan/{report}', [ReportHistoryController::class, 'show'])->name('histories.show');
+    });
 
     // PBI 13 & 15 - Verifikasi & Penugasan Teknisi (Admin)
     Route::prefix('admin')->name('admin.')->group(function () {

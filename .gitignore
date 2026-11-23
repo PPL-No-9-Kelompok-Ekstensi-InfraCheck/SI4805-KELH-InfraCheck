@@ -1,7 +1,10 @@
 *.log
+*.pyc
+__pycache__/
 .DS_Store
 .env
 .env.backup
+.env.dusk.local
 .env.production
 .phpactor.json
 .phpunit.result.cache
@@ -18,6 +21,7 @@
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+/public/uploads/*
 /storage/*.key
 /storage/pail
 /vendor

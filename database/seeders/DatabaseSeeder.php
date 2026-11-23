@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database with initial master data.
+     * Seed data awal aplikasi. Urutan mengikuti dependensi foreign key.
      */
     public function run(): void
     {
@@ -170,7 +170,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 8. Data contoh laporan, penugasan, dan progres perbaikan (PBI 16).
-        $this->call(RepairProgressSeeder::class);
+        // 8. Hak Akses per Role (Tabel permission & permission_role)
+        $this->call(PermissionSeeder::class);
     }
 }

@@ -108,7 +108,7 @@ class RepairScheduleTest extends TestCase
         ]);
     }
 
-    public function test_teknisi_can_schedule_via_teknisi_jadwal_endpoint_and_updates_status(): void
+    public function test_teknisi_scheduling_updates_report_status_and_records_history(): void
     {
         $teknisi = $this->teknisi();
         $assignment = $this->makeAssignmentWithoutSchedule($teknisi);
@@ -116,7 +116,8 @@ class RepairScheduleTest extends TestCase
         $startTime = now()->addDays(2)->setHour(8)->setMinute(0);
         $targetTime = (clone $startTime)->addHours(2);
 
-        $response = $this->actingAs($teknisi)->post(route('schedule.store', $assignment), [
+        $response = $this->actingAs($teknisi)->post(route('schedules.store'), [
+            'id_penugasan' => $assignment->id_penugasan,
             'waktu_mulai' => $startTime->format('Y-m-d H:i'),
             'target_selesai' => $targetTime->format('Y-m-d H:i'),
             'catatan_jadwal' => 'Penjadwalan melalui modul teknisi.',
@@ -139,9 +140,9 @@ class RepairScheduleTest extends TestCase
         ]);
     }
 
-    public function test_teknisi_can_view_teknisi_jadwal_calendar(): void
+    public function test_teknisi_can_view_schedule_calendar(): void
     {
-        $response = $this->actingAs($this->teknisi())->get(route('schedule.index'));
+        $response = $this->actingAs($this->teknisi())->get(route('schedules.index'));
 
         $response->assertOk();
         $response->assertSee('Penjadwalan Perbaikan');

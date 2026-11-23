@@ -23,6 +23,7 @@ class RepairProgressTest extends TestCase
     {
         parent::setUp();
         $this->seed(DatabaseSeeder::class);
+        $this->seed(\Database\Seeders\RepairProgressSeeder::class);
     }
 
     public function test_guest_is_redirected_to_login(): void
@@ -141,6 +142,11 @@ class RepairProgressTest extends TestCase
     {
         $teknisi = $this->teknisi();
         $assignment = $this->assignmentFor($teknisi);
+
+        // Seeder membuat laporan ini sudah "Sedang Dikerjakan"; atur ulang agar ada perubahan status.
+        $assignment->report->update([
+            'id_status' => ReportStatus::where('nama_status', 'Ditugaskan')->value('id_status'),
+        ]);
 
         $response = $this->actingAs($teknisi)->post(route('progress.store', $assignment), [
             'persentase' => 45,

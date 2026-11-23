@@ -137,6 +137,49 @@ class RepairProgressTest extends TestCase
         ]);
     }
 
+    public function test_progress_between_1_and_99_updates_report_status_to_sedang_dikerjakan_and_records_history(): void
+    {
+        $teknisi = $this->teknisi();
+        $assignment = $this->assignmentFor($teknisi);
+
+        $response = $this->actingAs($teknisi)->post(route('progress.store', $assignment), [
+            'persentase' => 45,
+            'catatan_progres' => 'Sedang membongkar unit perangkat untuk dibersihkan.',
+        ]);
+
+        $response->assertRedirect(route('progress.show', $assignment));
+
+        $assignment->report->refresh();
+        $this->assertSame('Sedang Dikerjakan', $assignment->report->status->nama_status);
+
+        $this->assertDatabaseHas('status_histories', [
+            'id_laporan' => $assignment->report->id_laporan,
+            'id_pengubah' => $teknisi->id_pengguna,
+        ]);
+    }
+
+    public function test_progress_100_percent_updates_report_status_to_menunggu_validasi_not_selesai(): void
+    {
+        $teknisi = $this->teknisi();
+        $assignment = $this->assignmentFor($teknisi);
+
+        $response = $this->actingAs($teknisi)->post(route('progress.store', $assignment), [
+            'persentase' => 100,
+            'catatan_progres' => 'Perbaikan tuntas, pengujian perangkat berfungsi normal.',
+        ]);
+
+        $response->assertRedirect(route('progress.show', $assignment));
+
+        $assignment->report->refresh();
+        // Aturan bisnis: Tidak langsung selesai, melainkan Menunggu Validasi admin
+        $this->assertSame('Menunggu Validasi', $assignment->report->status->nama_status);
+
+        $this->assertDatabaseHas('status_histories', [
+            'id_laporan' => $assignment->report->id_laporan,
+            'id_pengubah' => $teknisi->id_pengguna,
+        ]);
+    }
+
     public function test_teknisi_cannot_manage_other_technician_assignment(): void
     {
         $teknisi = $this->teknisi();

@@ -60,51 +60,61 @@
                     Dashboard
                 </a>
 
-                <!-- SECTION: MASTER DATA -->
-                <div class="pt-5 pb-1">
-                    <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
-                        MASTER DATA
-                    </p>
-                </div>
-                <a href="#" class="{{ $navIdle }}">Gedung</a>
-                <a href="#" class="{{ $navIdle }}">Ruangan</a>
-                <a href="#" class="{{ $navIdle }}">Kategori Infrastruktur</a>
-                <a href="#" class="{{ $navIdle }}">Jenis Perangkat</a>
-                <a href="#" class="{{ $navIdle }}">Perangkat</a>
+                @if ($user->hasRole('Teknisi'))
+                    <!-- Menu Khusus Teknisi (Sesuai Mockup Gambar 4.5.18 & 4.5.19) -->
+                    <a href="{{ route('progress.index') }}" class="{{ request()->routeIs('progress.*') ? $navActive : $navIdle }}">
+                        Tugas Saya
+                    </a>
+                    <a href="{{ route('schedule.index') }}" class="{{ request()->routeIs('schedule.*') || request()->routeIs('schedules.*') ? $navActive : $navIdle }}">
+                        Jadwal Perbaikan
+                    </a>
+                @else
+                    <!-- SECTION: MASTER DATA -->
+                    <div class="pt-5 pb-1">
+                        <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
+                            MASTER DATA
+                        </p>
+                    </div>
+                    <a href="#" class="{{ $navIdle }}">Gedung</a>
+                    <a href="#" class="{{ $navIdle }}">Ruangan</a>
+                    <a href="#" class="{{ $navIdle }}">Kategori Infrastruktur</a>
+                    <a href="#" class="{{ $navIdle }}">Jenis Perangkat</a>
+                    <a href="#" class="{{ $navIdle }}">Perangkat</a>
 
-                <!-- SECTION: LAPORAN -->
-                <div class="pt-5 pb-1">
-                    <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
-                        LAPORAN
-                    </p>
-                </div>
-                <a href="#" class="{{ $navIdle }}">Verifikasi Laporan</a>
-                <a href="#" class="{{ $navIdle }}">Prioritas Penanganan</a>
-                <a href="#" class="{{ $navIdle }}">Penugasan Teknisi</a>
-                <a href="{{ route('schedules.index') }}" class="{{ request()->routeIs('schedules.*') ? $navActive : $navIdle }}">
-                    {{ $user->hasRole('Teknisi') ? 'Jadwal Saya' : 'Jadwal Perbaikan' }}
-                </a>
+                    <!-- SECTION: LAPORAN -->
+                    <div class="pt-5 pb-1">
+                        <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
+                            LAPORAN
+                        </p>
+                    </div>
+                    <a href="#" class="{{ $navIdle }}">Verifikasi Laporan</a>
+                    <a href="#" class="{{ $navIdle }}">Prioritas Penanganan</a>
+                    <a href="#" class="{{ $navIdle }}">Penugasan Teknisi</a>
+                    <a href="{{ route('schedule.index') }}" class="{{ request()->routeIs('schedule.*') || request()->routeIs('schedules.*') ? $navActive : $navIdle }}">
+                        Jadwal Perbaikan
+                    </a>
 
-                <!-- SECTION: PEMANTAUAN -->
-                <div class="pt-5 pb-1">
-                    <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
-                        PEMANTAUAN
-                    </p>
-                </div>
-                <a href="{{ route('progress.index') }}" class="{{ request()->routeIs('progress.*') ? $navActive : $navIdle }}">
-                    Progres Perbaikan
-                </a>
-                <a href="#" class="{{ $navIdle }}">Status Laporan</a>
-                <a href="#" class="{{ $navIdle }}">Riwayat Penanganan</a>
+                    <!-- SECTION: PEMANTAUAN -->
+                    <div class="pt-5 pb-1">
+                        <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
+                            PEMANTAUAN
+                        </p>
+                    </div>
+                    <a href="{{ route('progress.index') }}" class="{{ request()->routeIs('progress.*') ? $navActive : $navIdle }}">
+                        Progres Perbaikan
+                    </a>
+                    <a href="#" class="{{ $navIdle }}">Status Laporan</a>
+                    <a href="#" class="{{ $navIdle }}">Riwayat Penanganan</a>
 
-                <!-- SECTION: PENGATURAN -->
-                <div class="pt-5 pb-1">
-                    <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
-                        PENGATURAN
-                    </p>
-                </div>
-                <a href="#" class="{{ $navIdle }}">Pengguna</a>
-                <a href="#" class="{{ $navIdle }}">Hak Akses</a>
+                    <!-- SECTION: PENGATURAN -->
+                    <div class="pt-5 pb-1">
+                        <p class="text-[10px] font-bold text-blue-200/70 uppercase tracking-wider px-3.5">
+                            PENGATURAN
+                        </p>
+                    </div>
+                    <a href="#" class="{{ $navIdle }}">Pengguna</a>
+                    <a href="#" class="{{ $navIdle }}">Hak Akses</a>
+                @endif
 
                 <!-- Logout Button Form -->
                 <form action="{{ route('logout') }}" method="POST" class="pt-1">

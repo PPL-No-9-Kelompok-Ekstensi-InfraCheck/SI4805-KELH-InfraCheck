@@ -89,6 +89,14 @@ class Report extends Model
         return sprintf('LP-%s-%04d', $tahun, $this->id_laporan);
     }
 
+    /**
+     * Menentukan apakah laporan masih dapat diperbarui oleh pelapor (sebelum diverifikasi).
+     */
+    public function dapatDiperbarui(): bool
+    {
+        return $this->status?->nama_status === 'Menunggu Verifikasi';
+    }
+
     public function reporter()
     {
         return $this->belongsTo(User::class, 'id_pelapor', 'id_pengguna');

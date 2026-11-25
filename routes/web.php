@@ -87,8 +87,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan/status', [ReportStatusController::class, 'index'])->name('reports.status');
     });
 
-    // Detail laporan (ditempatkan setelah route statis /laporan/buat, /laporan/cek-duplikat, /laporan/status)
+    // Detail & pembaruan laporan — PBI 11 & 12 (ditempatkan setelah route statis /laporan/buat, /laporan/cek-duplikat, /laporan/status)
     Route::get('/laporan/{laporan}', [ReportController::class, 'show'])->name('reports.show');
+    Route::get('/laporan/{laporan}/edit', [ReportController::class, 'edit'])->name('reports.edit');
+    Route::put('/laporan/{laporan}', [ReportController::class, 'update'])->name('reports.update');
 
     // PBI 20 - Pemberian Tanggapan pada Laporan
     Route::get('/laporan/{report}/tanggapan', [ReportCommentController::class, 'create'])->name('reports.comments.create');

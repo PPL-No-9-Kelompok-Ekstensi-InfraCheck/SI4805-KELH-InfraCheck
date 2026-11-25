@@ -294,9 +294,19 @@
             </p>
         </div>
 
-        <a href="{{ route('reports.create') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#e11d48] hover:bg-[#be123c] rounded-lg shadow-sm transition-colors">
-            Buat Laporan Baru
-        </a>
+        <div class="flex flex-wrap items-center gap-2">
+            @if ((int) $laporan->id_pelapor === (int) auth()->id() && $laporan->dapatDiperbarui())
+                <a href="{{ route('reports.edit', $laporan->id_laporan) }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-lg shadow-sm transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                    </svg>
+                    Edit Laporan
+                </a>
+            @endif
+            <a href="{{ route('reports.create') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#e11d48] hover:bg-[#be123c] rounded-lg shadow-sm transition-colors">
+                Buat Laporan Baru
+            </a>
+        </div>
     </div>
 
     <!-- Indikator progres -->

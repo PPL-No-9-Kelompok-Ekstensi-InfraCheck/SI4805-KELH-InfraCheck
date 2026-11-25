@@ -61,7 +61,7 @@
                     </p>
                 </div>
                 @if ($can('reports.view'))
-                    <a href="{{ Route::has('reports.index') ? route('reports.index') : '#' }}" data-menu="reports" class="{{ request()->routeIs('reports.index', 'reports.create', 'reports.show') ? $activeClass : $linkClass }}">Laporan</a>
+                    <a href="{{ Route::has('reports.index') ? route('reports.index') : '#' }}" data-menu="reports" class="{{ request()->routeIs('reports.index', 'reports.create', 'reports.show', 'reports.edit') ? $activeClass : $linkClass }}">Laporan</a>
                 @endif
                 @if ($can('report-verification.view'))
                     <a href="{{ Route::has('admin.verification.index') ? route('admin.verification.index') : '#' }}" class="{{ request()->routeIs('admin.verification.*') ? $activeClass : $linkClass }}">Verifikasi Laporan</a>

@@ -157,9 +157,16 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 text-right">
-                                    <a href="{{ route('reports.show', $item->id_laporan) }}" class="text-xs font-semibold text-blue-700 hover:text-blue-800 whitespace-nowrap">
-                                        Lihat Detail
-                                    </a>
+                                    <div class="inline-flex items-center justify-end gap-3">
+                                        @if ((int) $item->id_pelapor === (int) auth()->id() && $item->dapatDiperbarui())
+                                            <a href="{{ route('reports.edit', $item->id_laporan) }}" class="text-xs font-semibold text-amber-600 hover:text-amber-700 whitespace-nowrap">
+                                                Edit Laporan
+                                            </a>
+                                        @endif
+                                        <a href="{{ route('reports.show', $item->id_laporan) }}" class="text-xs font-semibold text-blue-700 hover:text-blue-800 whitespace-nowrap">
+                                            Lihat Detail
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

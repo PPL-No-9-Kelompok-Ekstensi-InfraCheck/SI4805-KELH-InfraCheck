@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Assignment;
 use App\Models\RepairProgress;
+use App\Models\ReportStatus;
+use App\Models\StatusHistory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class RepairProgressController extends Controller
@@ -87,8 +90,38 @@ class RepairProgressController extends Controller
         $this->authorizeManage($assignment);
 
         $validated = $this->validatedData($request);
+        $user = Auth::user();
 
-        $assignment->progressUpdates()->create($validated);
+        DB::transaction(function () use ($assignment, $validated, $user) {
+            $assignment->progressUpdates()->create($validated);
+
+            $persentase = (int) $validated['persentase'];
+            $report = $assignment->report;
+
+            if ($report) {
+                $targetStatusName = null;
+                if ($persentase === 100) {
+                    $targetStatusName = 'Menunggu Validasi';
+                } elseif ($persentase > 0) {
+                    $targetStatusName = 'Sedang Dikerjakan';
+                }
+
+                if ($targetStatusName) {
+                    $newStatus = ReportStatus::firstOrCreate(['nama_status' => $targetStatusName]);
+                    if ($report->id_status !== $newStatus->id_status) {
+                        $report->update(['id_status' => $newStatus->id_status]);
+
+                        StatusHistory::create([
+                            'id_laporan' => $report->id_laporan,
+                            'id_status' => $newStatus->id_status,
+                            'id_pengubah' => $user->id_pengguna,
+                            'waktu_perubahan' => now(),
+                            'catatan_perubahan' => "Progres perbaikan mencapai {$persentase}%: {$validated['catatan_progres']}",
+                        ]);
+                    }
+                }
+            }
+        });
 
         return redirect()
             ->route('progress.show', $assignment)

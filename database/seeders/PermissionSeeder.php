@@ -9,6 +9,14 @@ use Illuminate\Database\Seeder;
 class PermissionSeeder extends Seeder
 {
     /**
+     * Modul yang hak akses default-nya juga diberikan ke role yang sudah punya
+     * hak akses (penambahan saja, tidak mencabut yang sudah ada).
+     *
+     * @var list<string>
+     */
+    private const MODUL_BARU = ['repair-documents'];
+
+    /**
      * Mendaftarkan daftar hak akses dan menetapkan default per role.
      */
     public function run(): void
@@ -37,13 +45,27 @@ class PermissionSeeder extends Seeder
         foreach (config('permissions.defaults') as $roleName => $codes) {
             $role = Role::where('nama_peran', $roleName)->first();
 
-            // Jangan menimpa pengaturan hak akses yang sudah diubah Admin.
-            if ($role === null || $role->permissions()->exists()) {
+            if ($role === null) {
                 continue;
             }
 
             if ($codes === '*') {
                 $codes = array_keys($permissionIds);
+            }
+
+            // Jangan menimpa pengaturan hak akses yang sudah diubah Admin.
+            if ($role->permissions()->exists()) {
+                // Role sudah punya hak akses: hanya tambahkan default modul baru.
+                $codeModulBaru = array_filter(
+                    $codes,
+                    fn (string $code): bool => in_array(explode('.', $code)[0], self::MODUL_BARU, true)
+                );
+
+                $role->permissions()->syncWithoutDetaching(
+                    array_values(array_map(fn (string $code) => $permissionIds[$code], $codeModulBaru))
+                );
+
+                continue;
             }
 
             $role->permissions()->sync(

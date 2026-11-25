@@ -8,6 +8,7 @@ use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceTypeController;
+use App\Http\Controllers\RepairDocumentController;
 use App\Http\Controllers\RepairProgressController;
 use App\Http\Controllers\RepairScheduleController;
 use App\Http\Controllers\ReportCommentController;
@@ -121,4 +122,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/jadwal-perbaikan/{schedule}/edit', [RepairScheduleController::class, 'edit'])->name('schedules.edit');
     Route::put('/jadwal-perbaikan/{schedule}', [RepairScheduleController::class, 'update'])->name('schedules.update');
     Route::delete('/jadwal-perbaikan/{schedule}', [RepairScheduleController::class, 'destroy'])->name('schedules.destroy');
+
+    // PBI 18 - Mengelola Dokumentasi Hasil Perbaikan
+    Route::get('/dokumentasi-perbaikan', [RepairDocumentController::class, 'index'])->name('documents.index');
+    Route::get('/dokumentasi-perbaikan/{assignment}', [RepairDocumentController::class, 'create'])->name('documents.create');
+    Route::post('/dokumentasi-perbaikan/{assignment}', [RepairDocumentController::class, 'store'])->name('documents.store');
+    Route::put('/dokumentasi-perbaikan/berkas/{document}', [RepairDocumentController::class, 'update'])->name('documents.update');
+    Route::delete('/dokumentasi-perbaikan/berkas/{document}', [RepairDocumentController::class, 'destroy'])->name('documents.destroy');
 });

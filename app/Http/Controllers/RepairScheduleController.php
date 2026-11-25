@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Assignment;
 use App\Models\RepairSchedule;
+use App\Models\ReportStatus;
+use App\Models\StatusHistory;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class RepairScheduleController extends Controller
@@ -225,7 +228,12 @@ class RepairScheduleController extends Controller
             abort(403, 'Anda tidak berhak menjadwalkan penugasan milik teknisi lain.');
         }
 
-        $schedule = RepairSchedule::create($validated);
+        $schedule = DB::transaction(function () use ($validated, $assignment, $user) {
+            $schedule = RepairSchedule::create($validated);
+            $this->tandaiLaporanDijadwalkan($assignment, $user);
+
+            return $schedule;
+        });
 
         $weekParam = Carbon::parse($schedule->waktu_mulai)->format('Y-m-d');
 
@@ -265,7 +273,10 @@ class RepairScheduleController extends Controller
             'catatan_jadwal.max' => 'Catatan jadwal maksimal 1000 karakter.',
         ]);
 
-        $schedule->update($validated);
+        DB::transaction(function () use ($schedule, $validated) {
+            $schedule->update($validated);
+            $this->tandaiLaporanDijadwalkan($schedule->assignment, Auth::user());
+        });
 
         $weekParam = Carbon::parse($schedule->waktu_mulai)->format('Y-m-d');
 
@@ -284,6 +295,42 @@ class RepairScheduleController extends Controller
 
         return redirect()->route('schedules.index')
             ->with('success', 'Jadwal perbaikan berhasil dibatalkan.');
+    }
+
+    /**
+     * Mengubah status laporan menjadi "Dijadwalkan" (jika belum masuk tahap pengerjaan)
+     * dan mencatat riwayat perubahannya.
+     */
+    private function tandaiLaporanDijadwalkan(?Assignment $assignment, User $user): void
+    {
+        $report = $assignment?->report;
+
+        if (! $report) {
+            return;
+        }
+
+        $report->loadMissing('status');
+        $statusSaatIni = $report->status?->nama_status;
+
+        if ($statusSaatIni !== null && ! in_array($statusSaatIni, ['Ditugaskan', 'Diverifikasi', 'Menunggu Verifikasi'], true)) {
+            return;
+        }
+
+        $dijadwalkan = ReportStatus::firstOrCreate(['nama_status' => 'Dijadwalkan']);
+
+        if ($report->id_status === $dijadwalkan->id_status) {
+            return;
+        }
+
+        $report->update(['id_status' => $dijadwalkan->id_status]);
+
+        StatusHistory::create([
+            'id_laporan' => $report->id_laporan,
+            'id_status' => $dijadwalkan->id_status,
+            'id_pengubah' => $user->id_pengguna,
+            'waktu_perubahan' => now(),
+            'catatan_perubahan' => 'Jadwal perbaikan telah ditentukan.',
+        ]);
     }
 
     /**

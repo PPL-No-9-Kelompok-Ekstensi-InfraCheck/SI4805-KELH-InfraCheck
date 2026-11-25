@@ -67,12 +67,18 @@
                         <p class="text-xs text-slate-500 mt-1">{{ $assignment->progressUpdates->count() }} catatan tercatat</p>
                     </div>
 
-                    @if ($canManage)
-                        <a href="{{ route('progress.create', $assignment) }}"
-                           class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors shadow-sm">
-                            + Tambah Catatan Progres
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('documents.create', $assignment) }}"
+                           class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors shadow-sm">
+                            📷 Dokumentasi Hasil
                         </a>
-                    @endif
+                        @if ($canManage)
+                            <a href="{{ route('progress.create', $assignment) }}"
+                               class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors shadow-sm">
+                                + Tambah Catatan
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
                 @if ($assignment->progressUpdates->isEmpty())
@@ -112,9 +118,23 @@
                                 <p class="text-sm text-slate-700 mt-3 whitespace-pre-line leading-relaxed">{{ $progress->catatan_progres }}</p>
 
                                 @if ($progress->documents->isNotEmpty())
-                                    <p class="text-[11px] text-slate-500 mt-3">
-                                        📎 {{ $progress->documents->count() }} dokumentasi terlampir
-                                    </p>
+                                    <div class="mt-4 pt-3 border-t border-slate-100">
+                                        <p class="text-[11px] font-semibold text-slate-500 mb-2">
+                                            📷 Dokumentasi terlampir ({{ $progress->documents->count() }}):
+                                        </p>
+                                        <div class="flex flex-wrap gap-2.5">
+                                            @foreach ($progress->documents as $doc)
+                                                <div class="group relative rounded border border-slate-200 overflow-hidden bg-slate-50">
+                                                    <a href="{{ $doc->url }}" target="_blank" class="block w-16 h-16 bg-slate-200">
+                                                        <img src="{{ $doc->url }}" alt="{{ $doc->jenis_dokumentasi }}" class="w-full h-full object-cover">
+                                                    </a>
+                                                    <span class="absolute bottom-0 inset-x-0 bg-slate-900/70 text-white text-[9px] text-center font-bold px-1 py-0.5 truncate">
+                                                        {{ $doc->jenis_dokumentasi }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
                         @endforeach

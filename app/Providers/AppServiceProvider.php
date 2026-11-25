@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\RepairDocument;
 use App\Models\User;
+use App\Policies\RepairDocumentPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(RepairDocument::class, RepairDocumentPolicy::class);
+
         Gate::define('manage-buildings', function (User $user): bool {
             return $user->akun_aktif && $user->role?->nama_peran === 'Admin';
         });

@@ -33,4 +33,12 @@ class RepairProgress extends Model
     {
         return $this->hasMany(RepairDocument::class, 'id_progres', 'id_progres');
     }
+
+    /**
+     * Validasi rentang persentase (0–100%) sesuai rancangan Class Diagram 4.4.5.
+     */
+    public static function isValidPercentage(int|float $persentase): bool
+    {
+        return $persentase >= 0 && $persentase <= 100;
+    }
 }

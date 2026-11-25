@@ -5,8 +5,9 @@
     $canAny = fn (array $codes): bool => $sidebarUser !== null && $sidebarUser->hasAnyPermission($codes);
     $linkClass = 'flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors';
     $activeClass = 'flex items-center px-3.5 py-1.5 rounded-lg bg-blue-600/70 text-white font-medium text-sm transition-colors shadow-sm';
+    $isRepairActor = $sidebarUser !== null && $sidebarUser->hasRole(['Teknisi', 'Admin', 'Pimpinan']);
     $showMasterData = $canAny(['buildings.view', 'rooms.view', 'categories.view', 'device-types.view', 'devices.view']);
-    $showReports = $canAny(['reports.view', 'reports.create', 'report-verification.view', 'report-priorities.view', 'assignments.view', 'schedules.view']);
+    $showReports = $canAny(['reports.view', 'reports.create', 'report-verification.view', 'report-priorities.view', 'assignments.view', 'schedules.view', 'repair-documents.view']) || $isRepairActor;
     $showMonitoring = $canAny(['report-statuses.view', 'report-histories.view']);
     $showSettings = $can('users.view') || $sidebarUser?->isAdmin();
 @endphp
@@ -72,8 +73,16 @@
                 @if ($can('assignments.view'))
                     <a href="{{ Route::has('admin.assignment.create') ? route('admin.assignment.create') : '#' }}" class="{{ request()->routeIs('admin.assignment.*') ? $activeClass : $linkClass }}">Penugasan Teknisi</a>
                 @endif
-                @if ($can('schedules.view'))
+                @if ($can('schedules.view') || $isRepairActor)
                     <a href="{{ Route::has('schedules.index') ? route('schedules.index') : '#' }}" class="{{ request()->routeIs('schedules.*') ? $activeClass : $linkClass }}">Jadwal Perbaikan</a>
+                @endif
+                @if ($isRepairActor)
+                    {{-- PBI 16: Progres Perbaikan --}}
+                    <a href="{{ Route::has('progress.index') ? route('progress.index') : '#' }}" class="{{ request()->routeIs('progress.*') ? $activeClass : $linkClass }}">Progres Perbaikan</a>
+                @endif
+                @if ($can('repair-documents.view'))
+                    {{-- PBI 18: Dokumentasi Perbaikan --}}
+                    <a href="{{ Route::has('documents.index') ? route('documents.index') : '#' }}" class="{{ request()->routeIs('documents.*') ? $activeClass : $linkClass }}">Dokumentasi Perbaikan</a>
                 @endif
             @endif
 

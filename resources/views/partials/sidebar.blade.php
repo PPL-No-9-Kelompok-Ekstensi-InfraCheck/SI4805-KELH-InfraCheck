@@ -6,7 +6,7 @@
     $linkClass = 'flex items-center px-3.5 py-1.5 rounded-lg text-blue-100 hover:bg-blue-700/60 hover:text-white text-sm transition-colors';
     $activeClass = 'flex items-center px-3.5 py-1.5 rounded-lg bg-blue-600/70 text-white font-medium text-sm transition-colors shadow-sm';
     $showMasterData = $canAny(['buildings.view', 'rooms.view', 'categories.view', 'device-types.view', 'devices.view']);
-    $showReports = $canAny(['reports.view', 'reports.create', 'report-verification.view', 'report-priorities.view', 'assignments.view', 'schedules.view']);
+    $showReports = $canAny(['reports.view', 'reports.create', 'report-verification.view', 'report-priorities.view', 'assignments.view', 'schedules.view', 'progress.view']);
     $showMonitoring = $canAny(['report-statuses.view', 'report-histories.view']);
     $showSettings = $can('users.view') || $sidebarUser?->isAdmin();
 @endphp
@@ -74,6 +74,9 @@
                 @endif
                 @if ($can('schedules.view'))
                     <a href="{{ Route::has('schedules.index') ? route('schedules.index') : '#' }}" class="{{ request()->routeIs('schedules.*') ? $activeClass : $linkClass }}">Jadwal Perbaikan</a>
+                @endif
+                @if ($can('progress.view'))
+                    <a href="{{ Route::has('progress.index') ? route('progress.index') : '#' }}" class="{{ request()->routeIs('progress.*') ? $activeClass : $linkClass }}">Progres Perbaikan</a>
                 @endif
             @endif
 

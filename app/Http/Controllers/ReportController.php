@@ -166,15 +166,20 @@ class ReportController extends Controller
 
     /**
      * Memeriksa apakah perangkat masih memiliki laporan aktif (deteksi laporan ganda).
-     * Dipanggil lewat AJAX dari formulir.
+     * Dipanggil lewat AJAX dari formulir buat maupun edit laporan.
      */
     public function check(Request $request)
     {
         $request->validate([
             'id_perangkat' => ['required', 'integer', 'exists:devices,id_perangkat'],
+            'kecualikan_laporan' => ['nullable', 'integer'],
         ]);
 
-        $laporanAktif = $this->cariLaporanAktif((int) $request->input('id_perangkat'));
+        $kecualikanId = $request->filled('kecualikan_laporan')
+            ? (int) $request->input('kecualikan_laporan')
+            : null;
+
+        $laporanAktif = $this->cariLaporanAktif((int) $request->input('id_perangkat'), $kecualikanId);
 
         if (!$laporanAktif) {
             return response()->json(['duplikat' => false]);
@@ -186,6 +191,168 @@ class ReportController extends Controller
             'nomor_laporan' => $laporanAktif->nomor_laporan,
             'nama_status' => $laporanAktif->status->nama_status,
         ]);
+    }
+
+    /**
+     * Menampilkan formulir pembaruan informasi laporan kerusakan oleh Pelapor (PBI 12).
+     */
+    public function edit(Report $laporan)
+    {
+        abort_unless(
+            (int) $laporan->id_pelapor === (int) Auth::id(),
+            403,
+            'Anda tidak berhak memperbarui laporan milik pengguna lain.'
+        );
+
+        $laporan->load(['status', 'photos', 'device.deviceType', 'device.room.building']);
+
+        if (! $laporan->dapatDiperbarui()) {
+            return redirect()
+                ->route('reports.show', $laporan->id_laporan)
+                ->with(
+                    'error',
+                    'Laporan tidak dapat diperbarui karena statusnya sudah "' . ($laporan->status?->nama_status ?? 'diproses') . '". Pembaruan hanya diizinkan saat status masih Menunggu Verifikasi.'
+                );
+        }
+
+        $devices = Device::with(['deviceType', 'room.building'])
+            ->orderBy('nama_perangkat')
+            ->get();
+
+        $urgensiLevels = UrgencyLevel::orderBy('id_urgensi')->get();
+
+        return view('reports.edit', compact('laporan', 'devices', 'urgensiLevels'))
+            ->with('halamanAktif', 'reports.edit');
+    }
+
+    /**
+     * Memperbarui informasi laporan kerusakan beserta foto dokumentasinya (PBI 12).
+     */
+    public function update(Request $request, Report $laporan)
+    {
+        abort_unless(
+            (int) $laporan->id_pelapor === (int) Auth::id(),
+            403,
+            'Anda tidak berhak memperbarui laporan milik pengguna lain.'
+        );
+
+        $laporan->loadMissing('status');
+
+        if (! $laporan->dapatDiperbarui()) {
+            return redirect()
+                ->route('reports.show', $laporan->id_laporan)
+                ->with(
+                    'error',
+                    'Laporan tidak dapat diperbarui karena statusnya sudah "' . ($laporan->status?->nama_status ?? 'diproses') . '". Pembaruan hanya diizinkan saat status masih Menunggu Verifikasi.'
+                );
+        }
+
+        $data = $request->validate([
+            'id_perangkat' => ['required', 'integer', 'exists:devices,id_perangkat'],
+            'id_urgensi' => ['required', 'integer', 'exists:urgency_levels,id_urgensi'],
+            'deskripsi_kerusakan' => ['required', 'string', 'min:10', 'max:5000'],
+            'hapus_foto' => ['nullable', 'array'],
+            'hapus_foto.*' => ['integer'],
+            'foto' => ['nullable', 'array', 'max:5'],
+            'foto.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ], [
+            'id_perangkat.required' => 'Perangkat wajib dipilih.',
+            'id_perangkat.exists' => 'Perangkat yang dipilih tidak ditemukan.',
+            'id_urgensi.required' => 'Tingkat urgensi wajib dipilih.',
+            'id_urgensi.exists' => 'Tingkat urgensi yang dipilih tidak valid.',
+            'deskripsi_kerusakan.required' => 'Deskripsi kerusakan wajib diisi.',
+            'deskripsi_kerusakan.min' => 'Deskripsi kerusakan minimal :min karakter.',
+            'deskripsi_kerusakan.max' => 'Deskripsi kerusakan maksimal :max karakter.',
+            'hapus_foto.array' => 'Daftar foto yang akan dihapus tidak valid.',
+            'hapus_foto.*.integer' => 'Identitas foto yang akan dihapus tidak valid.',
+            'foto.max' => 'Maksimal :max foto dokumentasi yang dapat diunggah.',
+            'foto.*.image' => 'Berkas harus berupa gambar.',
+            'foto.*.mimes' => 'Format foto harus JPG, JPEG, PNG, atau WEBP.',
+            'foto.*.max' => 'Ukuran setiap foto maksimal 2 MB.',
+        ]);
+
+        // Deteksi laporan ganda pada perangkat lain (kecualikan laporan ini sendiri)
+        if ($this->cariLaporanAktif((int) $data['id_perangkat'], (int) $laporan->id_laporan)) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'id_perangkat' => 'Perangkat ini masih memiliki laporan aktif yang sedang ditangani. Silakan pilih perangkat lain.',
+                ]);
+        }
+
+        // Hitung sisa foto milik laporan ini setelah penghapusan dan pastikan total maksimal 5 foto
+        $idFotoDihapus = array_map('intval', $data['hapus_foto'] ?? []);
+        $fotoYangDihapus = $laporan->photos()
+            ->whereIn('id_foto', $idFotoDihapus)
+            ->get();
+
+        $jumlahFotoTersisa = $laporan->photos()->count() - $fotoYangDihapus->count();
+        $fotoBaru = $request->file('foto', []);
+        $jumlahFotoBaru = is_array($fotoBaru) ? count($fotoBaru) : 0;
+
+        if (($jumlahFotoTersisa + $jumlahFotoBaru) > 5) {
+            $sisaSlot = max(0, 5 - $jumlahFotoTersisa);
+
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'foto' => 'Total foto dokumentasi pada laporan maksimal 5 foto. Anda masih memiliki ' . $jumlahFotoTersisa . ' foto, sehingga hanya dapat mengunggah maksimal ' . $sisaSlot . ' foto tambahan.',
+                ]);
+        }
+
+        $perangkat = Device::findOrFail($data['id_perangkat']);
+        $berkasLamaUntukDihapus = $fotoYangDihapus->pluck('lokasi_berkas')->all();
+
+        DB::transaction(function () use ($request, $laporan, $data, $perangkat, $fotoYangDihapus) {
+            $laporan->update([
+                'id_perangkat' => $perangkat->id_perangkat,
+                'id_ruangan' => $perangkat->id_ruangan,
+                'id_urgensi' => $data['id_urgensi'],
+                'deskripsi_kerusakan' => $data['deskripsi_kerusakan'],
+            ]);
+
+            // Hapus catatan foto yang ditandai untuk dihapus
+            if ($fotoYangDihapus->isNotEmpty()) {
+                $laporan->photos()
+                    ->whereIn('id_foto', $fotoYangDihapus->pluck('id_foto')->all())
+                    ->delete();
+            }
+
+            // Simpan foto dokumentasi tambahan (jika ada)
+            if ($request->hasFile('foto')) {
+                $direktori = public_path('uploads/laporan');
+                if (! is_dir($direktori)) {
+                    mkdir($direktori, 0755, true);
+                }
+
+                foreach ($request->file('foto') as $foto) {
+                    $namaAsli = preg_replace('/[^A-Za-z0-9\.\-_]/', '', $foto->getClientOriginalName());
+                    $namaBerkas = time() . '_' . $laporan->id_laporan . '_' . uniqid() . '_' . $namaAsli;
+
+                    $foto->move($direktori, $namaBerkas);
+
+                    ReportPhoto::create([
+                        'id_laporan' => $laporan->id_laporan,
+                        'lokasi_berkas' => 'uploads/laporan/' . $namaBerkas,
+                        'waktu_unggah' => now(),
+                    ]);
+                }
+            }
+        });
+
+        // Hapus berkas fisik foto lama setelah transaksi basis data berhasil
+        foreach ($berkasLamaUntukDihapus as $lokasi) {
+            if ($lokasi) {
+                $jalurBerkas = public_path($lokasi);
+                if (is_file($jalurBerkas)) {
+                    @unlink($jalurBerkas);
+                }
+            }
+        }
+
+        return redirect()
+            ->route('reports.show', $laporan->id_laporan)
+            ->with('success', 'Informasi laporan kerusakan berhasil diperbarui.');
     }
 
     /**
@@ -273,10 +440,13 @@ class ReportController extends Controller
     /**
      * Mencari laporan aktif (belum selesai) pada sebuah perangkat.
      */
-    private function cariLaporanAktif(int $idPerangkat): ?Report
+    private function cariLaporanAktif(int $idPerangkat, ?int $kecualikanIdLaporan = null): ?Report
     {
         return Report::with('status')
             ->where('id_perangkat', $idPerangkat)
+            ->when($kecualikanIdLaporan !== null, function ($query) use ($kecualikanIdLaporan) {
+                $query->where('id_laporan', '!=', $kecualikanIdLaporan);
+            })
             ->whereHas('status', function ($query) {
                 $query->whereIn('nama_status', self::STATUS_AKTIF);
             })

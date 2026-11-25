@@ -42,8 +42,8 @@
                 @if ($can('rooms.view'))
                     <a href="{{ Route::has('rooms.index') ? route('rooms.index') : '#' }}" class="{{ ($activeNav === 'rooms' || request()->routeIs('rooms.*')) ? $activeClass : $linkClass }}">Ruangan</a>
                 @endif
-                @if ($can('categories.view'))
-                    <a href="#" class="{{ $linkClass }}">Kategori Infrastruktur</a>
+                @if ($can('categories.view') && $sidebarUser?->can('manage-categories'))
+                    <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? $activeClass : $linkClass }}">Kategori Infrastruktur</a>
                 @endif
                 @if ($can('device-types.view'))
                     <a href="{{ Route::has('device-types.index') ? route('device-types.index') : '#' }}" class="{{ request()->routeIs('device-types.*') ? $activeClass : $linkClass }}">Jenis Perangkat</a>

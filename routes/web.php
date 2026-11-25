@@ -8,6 +8,7 @@ use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\DeviceTypeController;
+use App\Http\Controllers\InfrastructureCategoryController;
 use App\Http\Controllers\RepairProgressController;
 use App\Http\Controllers\RepairScheduleController;
 use App\Http\Controllers\ReportCommentController;
@@ -69,6 +70,15 @@ Route::middleware('auth')->group(function () {
     Route::resource('rooms', RoomController::class)
         ->except(['show'])
         ->middleware('can:manage-rooms');
+
+    // PBI 6 - Kategori Infrastruktur (Admin aktif dan hak akses per aksi)
+    Route::resource('categories', InfrastructureCategoryController::class)
+        ->except(['show'])
+        ->middleware('can:manage-categories')
+        ->middlewareFor('index', 'permission:categories.view')
+        ->middlewareFor(['create', 'store'], 'permission:categories.create')
+        ->middlewareFor(['edit', 'update'], 'permission:categories.update')
+        ->middlewareFor('destroy', 'permission:categories.delete');
 
     // PBI 7 & 8 - Jenis Perangkat dan Perangkat (Admin)
     Route::middleware('role:Admin')->group(function () {

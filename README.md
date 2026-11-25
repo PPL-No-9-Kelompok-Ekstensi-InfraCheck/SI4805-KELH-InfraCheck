@@ -313,7 +313,7 @@ docker compose exec app php artisan dusk --group=pbi1 --group=pbi3 --group=pbi13
 ```
 
 Daftar `--group` yang tersedia di `tests/Browser/`:
-`login`, `pbi1`, `pbi3`, `pbi4`, `pbi5`, `pbi7`, `pbi8`, `pbi10`, `pbi11`, `pbi13`, `pbi15`, `pbi16`, `pbi17`, `pbi19`, `pbi20`.
+`login`, `pbi1`, `pbi3`, `pbi4`, `pbi5`, `pbi7`, `pbi8`, `pbi10`, `pbi11`, `pbi13`, `pbi14`, `pbi15`, `pbi16`, `pbi17`, `pbi19`, `pbi20`.
 
 ---
 © 2026 **Kelompok 9 (Ekstensi InfraCheck)** — SI-48-05 Telkom University. All rights reserved.

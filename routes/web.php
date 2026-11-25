@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccessController;
 use App\Http\Controllers\Admin\AssignmentController;
+use App\Http\Controllers\Admin\PriorityController;
 use App\Http\Controllers\Admin\VerificationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BuildingController;
@@ -96,11 +97,18 @@ Route::middleware('auth')->group(function () {
     Route::put('/laporan/{report}/tanggapan/{comment}', [ReportCommentController::class, 'update'])->name('reports.comments.update');
     Route::delete('/laporan/{report}/tanggapan/{comment}', [ReportCommentController::class, 'destroy'])->name('reports.comments.destroy');
 
-    // PBI 13 & 15 - Verifikasi & Penugasan Teknisi (Admin)
+    // PBI 13, 14 & 15 - Verifikasi, Prioritas & Penugasan Teknisi (Admin)
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/verifikasi', [VerificationController::class, 'index'])->name('verification.index');
         Route::post('/verifikasi/{id}/verify', [VerificationController::class, 'verify'])->name('verification.verify');
         Route::post('/verifikasi/{id}/reject', [VerificationController::class, 'reject'])->name('verification.reject');
+
+        Route::middleware('permission:report-priorities.view,report-priorities.update')->group(function () {
+            Route::get('/prioritas', [PriorityController::class, 'index'])->name('priority.index');
+        });
+        Route::middleware('permission:report-priorities.update')->group(function () {
+            Route::post('/prioritas/{id}', [PriorityController::class, 'update'])->name('priority.update');
+        });
 
         Route::get('/penugasan', [AssignmentController::class, 'create'])->name('assignment.create');
         Route::post('/penugasan/{id}/assign', [AssignmentController::class, 'store'])->name('assignment.store');

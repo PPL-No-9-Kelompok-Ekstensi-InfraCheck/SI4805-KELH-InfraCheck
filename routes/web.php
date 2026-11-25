@@ -76,6 +76,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('devices', DeviceController::class)->except('show');
     });
 
+    // PBI 9 - Menampilkan detail perangkat (read-only)
+    Route::get('/devices/{device}', [DeviceController::class, 'show'])
+        ->middleware('permission:devices.view')
+        ->name('devices.show');
+
     // PBI 10 & 11 - Pembuatan dan Pemantauan Laporan Kerusakan (Pelapor)
     Route::get('/laporan/buat', [ReportController::class, 'create'])->name('reports.create');
     Route::post('/laporan', [ReportController::class, 'store'])->name('reports.store');

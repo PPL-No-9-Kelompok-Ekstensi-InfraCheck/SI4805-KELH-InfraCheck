@@ -20,6 +20,18 @@ class DeviceController extends Controller
         return view('devices.index', compact('devices'));
     }
 
+    public function show(Device $device)
+    {
+        $device->load(['deviceType.category', 'room.building']);
+
+        $reports = $device->reports()
+            ->with(['status', 'urgency', 'priority', 'reporter'])
+            ->orderByDesc('waktu_laporan')
+            ->get();
+
+        return view('devices.show', compact('device', 'reports'));
+    }
+
     public function create()
     {
         return view('devices.create', $this->formData());

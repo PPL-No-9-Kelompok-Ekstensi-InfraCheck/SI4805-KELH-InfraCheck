@@ -29,6 +29,11 @@
                 Dashboard
             </a>
 
+            <!-- Profil Saya -->
+            <a href="{{ route('profile.index') }}" data-menu="profile" class="{{ $activeNav === 'profile' ? $activeClass : $linkClass }}">
+                Profil Saya
+            </a>
+
             @if ($showMasterData)
                 <!-- SECTION: MASTER DATA -->
                 <div class="pt-5 pb-1">

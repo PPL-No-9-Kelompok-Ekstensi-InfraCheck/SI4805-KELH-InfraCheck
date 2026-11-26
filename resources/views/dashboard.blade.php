@@ -46,14 +46,18 @@
             <h2 class="text-xl font-bold text-slate-900 tracking-tight">Dashboard</h2>
 
             <!-- User Profile Chip -->
-            <div class="flex items-center gap-3">
+            <a
+                href="{{ route('profile.index') }}"
+                class="flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-100"
+                title="Buka profil saya"
+            >
                 <div class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-slate-600 font-bold text-xs uppercase">
                     {{ substr($user->nama, 0, 1) }}
                 </div>
                 <span class="text-sm font-medium text-slate-700">
                     {{ $user->nama }} ({{ $user->role->nama_peran ?? 'Admin' }})
                 </span>
-            </div>
+            </a>
         </header>
 
         <!-- Main Dashboard Body -->

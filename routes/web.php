@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccessController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,20 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::middleware('permission:dashboard.view')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PBI 2 - Pengelolaan Profil Pengguna
+    |--------------------------------------------------------------------------
+    | Profil bersifat self-scoped: route tidak menerima parameter ID pengguna.
+    | Middleware dashboard.view dipakai karena wajib dimiliki semua role dan
+    | sekaligus menolak akun yang sudah dinonaktifkan.
+    */
+    Route::middleware('permission:dashboard.view')->group(function () {
+        Route::get('/profil', [ProfileController::class, 'index'])->name('profile.index');
+        Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     });
 
     /*

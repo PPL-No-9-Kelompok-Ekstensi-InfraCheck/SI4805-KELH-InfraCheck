@@ -13,7 +13,6 @@ use App\Models\UrgencyLevel;
 use App\Models\Priority;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Database\Seeders\DatabaseSeeder;
 
 class DeviceTest extends TestCase
@@ -224,6 +223,7 @@ class DeviceTest extends TestCase
         $device = Device::firstOrFail();
 
         $this->actingAs($user)->get(route('devices.index'))->assertForbidden();
+        $this->actingAs($user)->get(route('devices.show', $device))->assertForbidden();
         $this->actingAs($user)->get(route('devices.create'))->assertForbidden();
         $this->actingAs($user)->get(route('devices.edit', $device))->assertForbidden();
     }
@@ -279,15 +279,79 @@ class DeviceTest extends TestCase
             ->assertDontSee(route('devices.index'));
     }
 
-    public function test_route_show_tidak_tersedia(): void
+    public function test_show_menampilkan_detail_perangkat(): void
+    {
+        $device = Device::firstOrFail();
+        $device->load(['deviceType.category', 'room.building']);
+
+        $response = $this->actingAs($this->admin())->get(route('devices.show', $device));
+
+        $response->assertOk();
+        $response->assertSee('Detail Perangkat');
+        $response->assertSee($device->kode_aset);
+        $response->assertSee($device->nama_perangkat);
+        $response->assertSee($device->jenis_label);
+        $response->assertSee($device->kategori_label);
+        $response->assertSee($device->lokasi_label);
+        $response->assertSee($device->gedung_label);
+        $response->assertSee($device->kondisi->label());
+    }
+
+    public function test_show_menampilkan_laporan_kerusakan_terkait(): void
+    {
+        $device = Device::firstOrFail();
+        $pelapor = User::where('email', 'pelapor@infracheck.ac.id')->first();
+
+        $report = Report::create([
+            'id_pelapor'           => $pelapor->id_pengguna,
+            'id_perangkat'         => $device->id_perangkat,
+            'id_ruangan'           => $device->id_ruangan,
+            'id_status'            => ReportStatus::first()->id_status,
+            'id_urgensi'           => UrgencyLevel::first()->id_urgensi,
+            'id_prioritas'         => Priority::first()->id_prioritas,
+            'deskripsi_kerusakan'  => 'Lampu indikator mati',
+            'waktu_laporan'        => now(),
+        ]);
+
+        $response = $this->actingAs($this->admin())->get(route('devices.show', $device));
+
+        $response->assertOk();
+        $response->assertSee('Laporan Kerusakan Terkait');
+        $response->assertSee($report->nomor_laporan);
+        $response->assertSee($pelapor->nama);
+    }
+
+    public function test_show_menampilkan_pesan_kosong_bila_tidak_ada_laporan(): void
+    {
+        $device = Device::create($this->payload(['kode_aset' => 'AST-TANPA-LAPORAN']));
+
+        $response = $this->actingAs($this->admin())->get(route('devices.show', $device));
+
+        $response->assertOk();
+        $response->assertSee('Belum ada laporan kerusakan untuk perangkat ini.');
+    }
+
+    public function test_show_mengembalikan_404_untuk_perangkat_tidak_ada(): void
+    {
+        $response = $this->actingAs($this->admin())->get('/devices/999999');
+
+        $response->assertNotFound();
+    }
+
+    public function test_guest_cannot_access_show(): void
     {
         $device = Device::firstOrFail();
 
-        // Route show dihapus; URI yang sama hanya melayani PUT/PATCH dan DELETE.
-        $this->withoutExceptionHandling();
-        $this->expectException(MethodNotAllowedHttpException::class);
+        $this->get(route('devices.show', $device))->assertRedirect(route('login'));
+    }
+
+    public function test_index_menyediakan_tautan_detail(): void
+    {
+        $device = Device::firstOrFail();
 
         $this->actingAs($this->admin())
-            ->get("/devices/{$device->id_perangkat}");
+            ->get(route('devices.index'))
+            ->assertOk()
+            ->assertSee(route('devices.show', $device));
     }
 }

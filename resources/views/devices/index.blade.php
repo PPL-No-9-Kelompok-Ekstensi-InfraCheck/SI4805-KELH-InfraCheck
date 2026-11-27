@@ -30,7 +30,11 @@
                 @forelse ($devices as $device)
                     <tr class="hover:bg-slate-50/70">
                         <td class="px-6 py-3.5 font-mono text-xs text-slate-600">{{ $device->kode_aset }}</td>
-                        <td class="px-6 py-3.5 font-medium text-slate-800">{{ $device->nama_perangkat }}</td>
+                        <td class="px-6 py-3.5 font-medium text-slate-800">
+                            <a href="{{ route('devices.show', $device) }}" class="hover:text-blue-700 hover:underline">
+                                {{ $device->nama_perangkat }}
+                            </a>
+                        </td>
                         <td class="px-6 py-3.5 text-slate-600">
                             {{ $device->jenis_label }}
                             @if ($device->kategori_label)
@@ -49,6 +53,8 @@
                             </span>
                         </td>
                         <td class="px-6 py-3.5 text-right whitespace-nowrap">
+                            <a href="{{ route('devices.show', $device) }}"
+                               class="text-slate-500 hover:text-slate-700 text-sm font-medium mr-4">Detail</a>
                             <a href="{{ route('devices.edit', $device) }}"
                                class="text-blue-600 hover:text-blue-700 text-sm font-medium mr-4">Edit</a>
                             <form action="{{ route('devices.destroy', $device) }}" method="POST" class="inline"

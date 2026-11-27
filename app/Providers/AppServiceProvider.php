@@ -28,5 +28,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-rooms', function (User $user): bool {
             return $user->akun_aktif && $user->role?->nama_peran === 'Admin';
         });
+
+        Gate::define('manage-categories', function (User $user): bool {
+            return $user->akun_aktif && $user->isAdmin();
+        });
     }
 }

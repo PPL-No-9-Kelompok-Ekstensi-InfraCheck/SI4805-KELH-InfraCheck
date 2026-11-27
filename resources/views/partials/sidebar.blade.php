@@ -70,7 +70,7 @@
                     <a href="{{ Route::has('admin.verification.index') ? route('admin.verification.index') : '#' }}" class="{{ request()->routeIs('admin.verification.*') ? $activeClass : $linkClass }}">Verifikasi Laporan</a>
                 @endif
                 @if ($can('report-priorities.view'))
-                    <a href="#" class="{{ $linkClass }}">Prioritas Penanganan</a>
+                    <a href="{{ Route::has('admin.priority.index') ? route('admin.priority.index') : '#' }}" class="{{ request()->routeIs('admin.priority.*') ? $activeClass : $linkClass }}">Prioritas Penanganan</a>
                 @endif
                 @if ($can('assignments.view'))
                     <a href="{{ Route::has('admin.assignment.create') ? route('admin.assignment.create') : '#' }}" class="{{ request()->routeIs('admin.assignment.*') ? $activeClass : $linkClass }}">Penugasan Teknisi</a>

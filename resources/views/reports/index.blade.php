@@ -56,33 +56,41 @@
                 </p>
             </div>
 
-            <!-- Filter status -->
-            <form action="{{ route('reports.index') }}" method="GET" class="flex items-center gap-2">
-                <label for="status" class="text-xs font-semibold text-slate-600">Status</label>
-                <select
-                    id="status"
-                    name="status"
-                    class="px-3 py-2 text-xs text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                    <option value="">Semua status</option>
-                    @foreach ($daftarStatus as $status)
-                        <option value="{{ $status->nama_status }}" @selected($filterStatus === $status->nama_status)>
-                            {{ $status->nama_status }}
-                        </option>
-                    @endforeach
-                </select>
-                <button
-                    type="submit"
-                    class="px-3 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                >
-                    Terapkan
-                </button>
-                @if ($filterStatus !== '')
-                    <a href="{{ route('reports.index') }}" class="text-xs font-medium text-slate-500 hover:text-slate-700">
-                        Reset
+            <!-- Filter status & tombol buat laporan -->
+            <div class="flex flex-wrap items-center gap-3">
+                <form action="{{ route('reports.index') }}" method="GET" class="flex items-center gap-2">
+                    <label for="status" class="text-xs font-semibold text-slate-600">Status</label>
+                    <select
+                        id="status"
+                        name="status"
+                        class="px-3 py-2 text-xs text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        <option value="">Semua status</option>
+                        @foreach ($daftarStatus as $status)
+                            <option value="{{ $status->nama_status }}" @selected($filterStatus === $status->nama_status)>
+                                {{ $status->nama_status }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <button
+                        type="submit"
+                        class="px-3 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    >
+                        Terapkan
+                    </button>
+                    @if ($filterStatus !== '')
+                        <a href="{{ route('reports.index') }}" class="text-xs font-medium text-slate-500 hover:text-slate-700">
+                            Reset
+                        </a>
+                    @endif
+                </form>
+
+                @if (auth()->user()?->hasPermission('reports.create'))
+                    <a href="{{ route('reports.create') }}" class="inline-flex items-center px-3.5 py-2 text-xs font-semibold text-white bg-[#e11d48] hover:bg-[#be123c] rounded-lg transition-colors shadow-sm">
+                        + Buat Laporan
                     </a>
                 @endif
-            </form>
+            </div>
         </div>
 
         @if ($laporan->isEmpty())

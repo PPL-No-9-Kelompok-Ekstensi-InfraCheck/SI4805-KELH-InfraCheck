@@ -181,7 +181,7 @@
                                 {{ \App\Support\ReportStatusPresenter::formatDate($report->status_histories_max_waktu_perubahan ?? $report->created_at) }}
                             </td>
                             <td class="px-3 py-3 whitespace-nowrap text-right space-x-1.5">
-                                <a href="{{ route('reports.show', $report) }}"
+                                <a href="{{ route('histories.show', $report) }}"
                                    class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100">
                                     Detail
                                 </a>
